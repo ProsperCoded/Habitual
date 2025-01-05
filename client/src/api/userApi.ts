@@ -1,9 +1,12 @@
 import { SERVER_BASE_URL } from '@/utils/config';
 
-export async function logoutApi(errorLogger = (error: any) => {}) {
-  const url = new URL('/auth/logout', SERVER_BASE_URL);
+export async function getUserProfile(errorLogger: (error: any) => void) {
+  const url = new URL('user/profile', SERVER_BASE_URL);
+
   const response = await fetch(url, {
-    method: 'POST',
+    method: 'GET',
+
+    // to ensure cookies stored by the server is sent back
     credentials: 'include',
   });
   const responseData = await response.json();
@@ -11,6 +14,6 @@ export async function logoutApi(errorLogger = (error: any) => {}) {
     errorLogger(responseData.error);
     return;
   }
-  return responseData;
+
+  return responseData.data;
 }
-export async function loginApi() {}

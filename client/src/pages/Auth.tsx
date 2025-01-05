@@ -1,27 +1,17 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { USER_PROFILE_CONTEXT } from '@/context/Contexts';
-import { loginApi } from '@/api/authApi';
 import { ArrowLeft } from 'lucide-react';
+import { useLogin } from '@/services/authService';
 function Auth() {
   const params = useParams();
   const userId = params.id;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const autoLogin = useLogin();
   // const messageApi = us
-  const { setUserProfile } = useContext(USER_PROFILE_CONTEXT);
-  const errorLogger = (error: any) => {
-    console.error(error);
-  };
-  const handleAuth = async () => {
-    const response = await loginApi(errorLogger);
-    if (response) {
-      setUserProfile(response);
-      navigate('/');
-    }
-  };
   useEffect(() => {
-    handleAuth();
+    // serve as the auth handler, set the user profile automatically
+    autoLogin();
   }, []);
   return (
     <div className="flex justify-center items-center w-full h-screen">

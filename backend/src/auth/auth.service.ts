@@ -4,8 +4,9 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UsersService } from 'src/user/user.service';
 import jwtConfig, { JWT_IDENTIFIER } from 'src/config/jwt.config';
 import { JwtService } from '@nestjs/jwt';
-import { UserPayload } from 'src/types/types';
+import { UserPayload } from 'src/lib/types';
 import { ConfigType } from '@nestjs/config';
+import { Request, Response } from 'express';
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,7 +15,9 @@ export class AuthService {
     @Inject(jwtConfig.KEY)
     private jwtConfigurations: ConfigType<typeof jwtConfig>,
   ) {}
-
+  logout(res: Response) {
+    res.cookie('Authorization', '', { httpOnly: true });
+  }
   // Signup the user
   private async login(user: CreateUserDto): Promise<UserPayload> {
     const existingUser = await this.usersService.findByEmail(user.email);

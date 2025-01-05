@@ -1,1 +1,5 @@
-export const FRONTEND_URL = 'http://localhost:5000';
+import { registerAs } from '@nestjs/config';
+
+export default registerAs('config', () => ({
+  frontEndUrl: process.env.FRONTEND_URL,
+}));

@@ -4,8 +4,8 @@ import { Avatar, Popover } from 'antd';
 
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { logout } from '@/api/authApi';
 import { googleCallback } from '@/utils/config';
+import { useLogout } from '@/services/authService';
 export function UserAvatar({
   showName,
   auth,
@@ -13,20 +13,23 @@ export function UserAvatar({
   showName: boolean;
   auth: boolean;
 }) {
-  // const { userProfile } = useContext(USER_PROFILE_CONTEXT);
-  const userProfile = {};
+  const { userProfile } = useContext(USER_PROFILE_CONTEXT);
   const navigate = useNavigate();
+  const logoutService = useLogout();
+  const handleLogout = () => {
+    logoutService();
+  };
   useEffect(() => {
     console.log('user Profile changed', userProfile);
   }, [userProfile]);
-  const name = 'prosper';
+  const name = userProfile?.firstName;
   const options = (
     <div>
       <ul className="space-y-2 mx-2 px-2 min-w-[15ch] text-primary">
         <li
           className="hover:font-semibold hover:text-primaryDark transition-colors cursor-pointer select-none"
           onClick={() => {
-            logout();
+            handleLogout();
           }}
         >
           Sign out
@@ -42,7 +45,7 @@ export function UserAvatar({
       </ul>
     </div>
   );
-  return userProfile ? (
+  return userProfile && name ? (
     <span
       onDoubleClick={() => {
         navigate('/profile');
@@ -66,7 +69,11 @@ export function UserAvatar({
                 }}
                 size="default"
               >
-                <span className="font-semibold">{name[0]}</span>
+                <img
+                  src={userProfile.profilePicture}
+                  alt={name}
+                  className="rounded-full"
+                />
               </Avatar>
               <span className="ml-2 font-semibold text-Primary algin-middle">
                 {name}
@@ -75,9 +82,14 @@ export function UserAvatar({
           ) : (
             <Avatar
               style={{ backgroundColor: '#D6D979', verticalAlign: 'middle' }}
-              size="default"
+              size="large"
             >
-              <span className="font-semibold">{name[0]}</span>
+              {/* <span className="font-semibold">{name[0]}</span> */}
+              <img
+                src={userProfile.profilePicture}
+                alt={name}
+                className="rounded-full"
+              />
             </Avatar>
           )}
         </div>

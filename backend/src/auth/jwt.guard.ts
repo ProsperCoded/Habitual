@@ -19,7 +19,7 @@ export class JWTGuard implements CanActivate {
     const request = context.switchToHttp().getRequest() as Request;
     const decoded = this.jwtService.decode(request.cookies.Authorization);
     console.log({ decoded });
-    request.user = decoded;
+    request.user = { id: decoded.sub };
     return !!decoded;
   }
 }

@@ -12,7 +12,7 @@ export default function hero() {
       <h1 className="mb-6 font-bold text-4xl text-primary md:text-5xl lg:text-6xl">
         Transform Your Sleep Habits
       </h1>
-      <p className="mb-12 max-w-3xl text-lg text-primary/80 md:text-xl">
+      <p className="mb-12 max-w-3xl text-lg text-primaryDark md:text-xl">
         Join a community focused on improving sleep quality by waking up at a
         consistent time each day. Track your progress, share goals, and achieve
         better sleep together.
