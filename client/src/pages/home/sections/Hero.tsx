@@ -3,10 +3,12 @@ import googleIcon from '@/assets/google-icon.svg';
 import HeroImage from '@/assets/hero-image.jpeg';
 import HeroItem from '@/assets/hero-item.png';
 import { useNavigate } from 'react-router-dom';
-import { googleCallback, SERVER_BASE_URL } from '@/utils/config';
+import { googleCallback } from '@/utils/config';
+import { USER_PROFILE_CONTEXT } from '@/context/Contexts';
+import { useContext } from 'react';
 
 export default function hero() {
-  const navigate = useNavigate();
+  const { userProfile } = useContext(USER_PROFILE_CONTEXT);
   return (
     <div className="flex flex-col items-center mx-auto px-6 py-12 text-center container">
       <h1 className="mb-6 font-bold text-4xl text-primary md:text-5xl lg:text-6xl">
@@ -17,24 +19,26 @@ export default function hero() {
         consistent time each day. Track your progress, share goals, and achieve
         better sleep together.
       </p>
-      <div className="flex sm:flex-row flex-col gap-4 mb-16">
-        <a
-          className="flex justify-center items-center gap-3 bg-accent hover:bg-secondary px-8 py-3 rounded-full text-lg text-white hover:text-white transition-colors cursor-pointer"
-          href={googleCallback.toString()}
-        >
-          <img src={googleIcon} alt="" className="w-6" />
-          Sign In
-        </a>
+      {!userProfile && (
+        <div className="flex sm:flex-row flex-col gap-4 mb-16">
+          <a
+            className="flex justify-center items-center gap-3 bg-accent hover:bg-secondary px-8 py-3 rounded-full text-lg text-white hover:text-white transition-colors cursor-pointer"
+            href={googleCallback.toString()}
+          >
+            <img src={googleIcon} alt="" className="w-6" />
+            Sign In
+          </a>
 
-        <a
-          className="flex justify-center items-center gap-3 bg-accent hover:bg-secondary px-8 py-3 rounded-full text-lg text-white hover:text-white transition-colors cursor-pointer"
-          target="_blank"
-          href={googleCallback.toString()}
-        >
-          <img src={googleIcon} alt="" className="w-6" />
-          Sign Up
-        </a>
-      </div>
+          <a
+            className="flex justify-center items-center gap-3 bg-accent hover:bg-secondary px-8 py-3 rounded-full text-lg text-white hover:text-white transition-colors cursor-pointer"
+            target="_blank"
+            href={googleCallback.toString()}
+          >
+            <img src={googleIcon} alt="" className="w-6" />
+            Sign Up
+          </a>
+        </div>
+      )}
       <div className="relative w-full max-w-2xl aspect-[4/3]">
         <img
           src={HeroItem}

@@ -5,3 +5,8 @@ export type UserProfileType = {
   email: string;
   profilePicture: string;
 };
+export interface Group {
+  title: string;
+  description: string;
+  interval: string;
+}
