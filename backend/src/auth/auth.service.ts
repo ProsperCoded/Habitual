@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import { UsersService } from 'src/user/user.service';
+import { UserService } from 'src/user/user.service';
 import jwtConfig, { JWT_IDENTIFIER } from 'src/config/jwt.config';
 import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from 'src/lib/types';
@@ -10,7 +10,7 @@ import { Request, Response } from 'express';
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    private usersService: UserService,
     @Inject(JWT_IDENTIFIER) private jwtService: JwtService,
     @Inject(jwtConfig.KEY)
     private jwtConfigurations: ConfigType<typeof jwtConfig>,

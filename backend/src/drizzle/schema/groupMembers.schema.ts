@@ -1,6 +1,6 @@
 import { integer, pgTable, primaryKey } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { HabitGroup } from './habitGroup.schema';
+import { habitGroup } from './habitGroup.schema';
 import { user } from './users.schema';
 export const GroupMembers = pgTable(
   'groupMembers',
@@ -10,7 +10,7 @@ export const GroupMembers = pgTable(
       .references(() => user.id),
     groupId: integer('groupId')
       .notNull()
-      .references(() => HabitGroup.id),
+      .references(() => habitGroup.id),
   },
   (table) => ({
     pk: primaryKey({
@@ -26,8 +26,8 @@ export const groupMembersRelations = relations(GroupMembers, ({ one }) => ({
     fields: [GroupMembers.userId],
     references: [user.id],
   }),
-  group: one(HabitGroup, {
+  group: one(habitGroup, {
     fields: [GroupMembers.groupId],
-    references: [HabitGroup.id],
+    references: [habitGroup.id],
   }),
 }));

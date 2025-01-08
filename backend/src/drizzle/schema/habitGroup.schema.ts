@@ -22,14 +22,14 @@ function getDefaultTime() {
   return new Date().toTimeString().split(' ')[0];
 }
 
-export const HabitGroup = pgTable('habitGroup', {
+export const habitGroup = pgTable('habitGroup', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description').notNull(),
   groupState: groupState('groupState').notNull(),
   habitId: integer('habitId').references(() => habit.id),
   startDate: date('startDate').default(getDefaultDate()).notNull(),
-  startTime: time('startTime').default(getDefaultTime()).notNull(),
+  // startTime: time('startTime').default(getDefaultTime()).notNull(),
   interval: interval('interval').default('1 day').notNull(),
   creatorId: integer('creatorId')
     .notNull()
@@ -37,13 +37,13 @@ export const HabitGroup = pgTable('habitGroup', {
 });
 
 // Define relation
-export const habitGroupRelations = relations(HabitGroup, ({ one, many }) => ({
+export const habitGroupRelations = relations(habitGroup, ({ one, many }) => ({
   creator: one(user, {
-    fields: [HabitGroup.creatorId],
+    fields: [habitGroup.creatorId],
     references: [user.id],
   }),
   habit: one(habit, {
-    fields: [HabitGroup.habitId],
+    fields: [habitGroup.habitId],
     references: [habit.id],
   }),
   members: many(GroupMembers),

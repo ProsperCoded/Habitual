@@ -7,7 +7,7 @@ import { user } from 'src/drizzle/schema/users.schema';
 import { UserNotFoundException } from 'src/lib/Exceptions/UserExceptions';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(@Inject(DRIZZLE_SYMBOL) private db: DrizzleDB) {}
   async create(createUserDto: CreateUserDto) {
     const createdUsers = await this.db

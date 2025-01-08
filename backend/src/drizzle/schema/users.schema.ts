@@ -2,7 +2,7 @@ import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { habitActiveUsers, habit } from './habits.schema';
 import { GroupMembers } from './groupMembers.schema';
-import { HabitGroup } from './habitGroup.schema';
+import { habitGroup } from './habitGroup.schema';
 
 export const user = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -15,6 +15,6 @@ export const user = pgTable('users', {
 export const userRelations = relations(user, ({ one, many }) => ({
   activeHabits: many(habitActiveUsers),
   groups: many(GroupMembers),
-  createdGroups: many(HabitGroup),
+  createdGroups: many(habitGroup),
   createdHabit: many(habit),
 }));

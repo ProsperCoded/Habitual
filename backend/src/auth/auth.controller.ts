@@ -12,14 +12,14 @@ import { AuthGuard } from '@nestjs/passport';
 import config from 'src/config/config';
 import { ServerResponse, UserPayload } from 'src/lib/types';
 import { Request, Response } from 'express';
-import { UsersService } from 'src/user/user.service';
+import { UserService } from 'src/user/user.service';
 import { ConfigType } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UsersService,
+    private readonly userService: UserService,
     @Inject(config.KEY)
     private readonly configService: ConfigType<typeof config>,
   ) {}

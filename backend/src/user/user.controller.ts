@@ -9,17 +9,17 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { UsersService } from './user.service';
+import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JWTGuard } from 'src/auth/jwt.guard';
 import { Request } from 'express';
 import { ServerResponse, UserPayload } from 'src/lib/types';
-import { UserEntityDto } from 'src/user/dto/user-entity.dto';
+import { UserEntity } from 'src/user/entities/user.entity';
 
 @Controller('user')
-export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -33,7 +33,7 @@ export class UsersController {
 
   @Get('/profile')
   @UseGuards(JWTGuard)
-  async profile(@Req() req: Request): Promise<ServerResponse<UserEntityDto>> {
+  async profile(@Req() req: Request): Promise<ServerResponse<UserEntity>> {
     const { id } = req.user as { id: string };
     const user = await this.userService.findOne(id);
     let message = 'Successfully Fetched Profile User';

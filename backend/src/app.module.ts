@@ -5,6 +5,7 @@ import { DrizzleModule } from './drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { HabitGroupModule } from './habit-group/habit-group.module';
 import googleOauthConfig from 'src/config/google-oauth.config';
 import jwtConfig from 'src/config/jwt.config';
 import config from 'src/config/config';
@@ -19,6 +20,7 @@ import config from 'src/config/config';
       expandVariables: true,
     }),
     AuthModule,
+    HabitGroupModule,
   ],
   controllers: [AppController],
   providers: [AppService],

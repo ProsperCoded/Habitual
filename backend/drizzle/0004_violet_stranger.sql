@@ -1,0 +1,1 @@
+ALTER TABLE "habitGroup" DROP COLUMN "startTime";
