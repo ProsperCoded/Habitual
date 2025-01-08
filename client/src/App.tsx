@@ -4,7 +4,7 @@ import { AntDesignConfig } from '@/context/AntDesignContextWrapper';
 import Home from '@/pages/home/Home';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Auth from '@/pages/Auth';
-import Groups from '@/pages/groups/Groups';
+import HabitGroups from '@/pages/groups/Groups';
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         <ContextWrapper>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/groups" element={<Groups />} />
+            <Route path="/groups" element={<HabitGroups />} />
             <Route path="auth/:id" element={<Auth />} />
           </Routes>
         </ContextWrapper>

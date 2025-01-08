@@ -5,7 +5,8 @@ export default defineConfig({
   schema: './src/drizzle/schema/schema.ts',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL,
+    // Append the timeout setting to your connection string
+    url: `${process.env.DATABASE_URL}`,
     ssl: true,
   },
 });

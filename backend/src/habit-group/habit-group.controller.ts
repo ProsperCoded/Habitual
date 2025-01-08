@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Req,
+  Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { HabitGroupService } from './habit-group.service';
 import { CreateHabitGroupDto } from './dto/create-habit-group.dto';
@@ -38,5 +40,17 @@ export class HabitGroupController {
     );
     let message = 'Successfully created habit group';
     return { message, data: createdGroup };
+  }
+
+  @Put('/join-group/:id')
+  @UseGuards(JWTGuard)
+  async joinGroup(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) groupId: string,
+  ): Promise<ServerResponse<HabitEntity>> {
+    const { id } = req.user as { id: string };
+    await this.habitGroupService.joinGroup(id, groupId);
+    let message = 'Successfully Joined Habit Group';
+    return { message, data: null };
   }
 }

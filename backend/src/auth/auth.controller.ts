@@ -14,6 +14,7 @@ import { ServerResponse, UserPayload } from 'src/lib/types';
 import { Request, Response } from 'express';
 import { UserService } from 'src/user/user.service';
 import { ConfigType } from '@nestjs/config';
+import * as moment from 'moment';
 
 @Controller('auth')
 export class AuthController {
@@ -36,7 +37,12 @@ export class AuthController {
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user as UserPayload;
     console.log({ user });
-    res.cookie('Authorization', user.token, { httpOnly: true });
+    const today = moment();
+    const expiry = today.add(7, 'days');
+    res.cookie('Authorization', user.token, {
+      httpOnly: true,
+      expires: expiry.toDate(),
+    });
     const FRONTEND_URL = this.configService.frontEndUrl;
     const url = new URL(`auth/${user.id.toString()}`, FRONTEND_URL);
     // url.searchParams.append('id', user.id.toString());

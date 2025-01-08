@@ -6,6 +6,7 @@ import { DRIZZLE_SYMBOL } from 'src/drizzle/drizzle.module';
 import { DrizzleDB } from 'src/lib/types';
 import { habitGroup } from 'src/drizzle/schema/habitGroup.schema';
 import { ServerResponse } from 'src/lib/types';
+import { GroupMembers } from 'src/drizzle/schema/groupMembers.schema';
 @Injectable()
 export class HabitGroupService {
   constructor(
@@ -33,28 +34,52 @@ export class HabitGroupService {
     }
   }
 
-  findAll(includePrivate = false) {
-    return this.db.query.habitGroup.findMany({
-      where: !includePrivate
-        ? (table, { eq }) => eq(table.groupState, 'public')
-        : undefined,
-      with: {
-        creator: true,
-        habit: true,
-        members: true,
-      },
-    });
+  async findAll(includePrivate = false) {
+    try {
+      const habitGroups = await this.db.query.habitGroup.findMany({
+        where: !includePrivate
+          ? (table, { eq }) => eq(table.groupState, 'public')
+          : undefined,
+        with: {
+          creator: true,
+          habit: true,
+          members: {
+            // with: {
+            //   user: true,
+            // },
+          },
+        },
+      });
+      return habitGroups;
+    } catch (error) {
+      console.error(error);
+      const response: ServerResponse<null> = {
+        message: 'Failed to fetch habit groups',
+        data: null,
+        error: error.message,
+      };
+      throw new BadRequestException(response, {
+        cause: error,
+      });
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} habitGroup`;
-  }
-
-  update(id: number, updateHabitGroupDto: UpdateHabitGroupDto) {
-    return `This action updates a #${id} habitGroup`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} habitGroup`;
+  async joinGroup(userId: string, groupId: string) {
+    try {
+      const response = await this.db
+        .insert(GroupMembers)
+        .values([{ userId: +userId, groupId: +groupId }]);
+      return response;
+    } catch (error) {
+      console.error(error);
+      const response: ServerResponse<null> = {
+        message: 'Failed to join habit group',
+        data: null,
+        error: error.message,
+      };
+      throw new BadRequestException(response, {
+        cause: error,
+      });
+    }
   }
 }
