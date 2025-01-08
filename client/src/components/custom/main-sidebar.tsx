@@ -5,9 +5,8 @@ import {
   Settings,
   LogOut,
   Home,
-  PercentSquareIcon,
-  User,
-  ChevronsUpDown,
+  ChevronDown,
+  User2Icon,
 } from 'lucide-react';
 
 import {
@@ -18,6 +17,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { USER_PROFILE_CONTEXT } from '@/context/Contexts';
@@ -26,72 +26,32 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@radix-ui/react-collapsible';
-import { Button } from '@/components/ui/button';
+import { HabitGroup } from '@/types';
 
-export function MainSidebar() {
+export enum SidebarMenuItems {
+  Home = 'Home',
+  Profile = 'Profile',
+  Groups = 'Groups',
+}
+type MainSidebarProps = {
+  groups: HabitGroup[];
+  selectedDisplay: SidebarMenuItems | number;
+  setSelectedDisplay: React.Dispatch<
+    React.SetStateAction<number | SidebarMenuItems>
+  >;
+};
+export function MainSidebar({
+  groups,
+  selectedDisplay,
+  setSelectedDisplay,
+}: MainSidebarProps) {
   const { userProfile } = React.useContext(USER_PROFILE_CONTEXT);
 
-  const navigation = [
-    {
-      title: 'Home',
-      component: (
-        <a href="#" className="ml-2 text-xl">
-          <Home className="size-10" />
-          <span>{'Home'}</span>
-        </a>
-      ),
-      isActive: true,
-    },
-    {
-      title: 'Groups',
-      component: (
-        <Collapsible
-   
-          className="space-y-2 w-auto max-w-full"
-        >
-          <CollapsibleTrigger asChild>
-            <a href="#" className="ml-2 text-xl">
-              <Users className="size-10" />
-              <span>{'Groups'}</span>
-              <Button variant="ghost" size="sm" className="p-0 w-9">
-                <ChevronsUpDown className="w-4 h-4" />
-              </Button>
-            </a>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2 pl-2">
-            <div
-              className="hover:bg-background px-3 py-2 border rounded-md font-mono text-sm hover:text-primaryDark transition-colors"
-              onClick={() => {}}
-            >
-              Eating well
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      ),
-    },
-    {
-      title: 'Profile',
-      component: (
-        <a href="#" className="ml-2 text-xl">
-          <User className="size-10" />
-          <span>{'Profile'}</span>
-        </a>
-      ),
-    },
-    {
-      title: 'Create Habit',
-      component: (
-        <a href="#" className="ml-2 text-xl">
-          <Plus className="size-10" />
-          <span>{'Create Habit'}</span>
-        </a>
-      ),
-    },
-  ];
   return (
     <Sidebar
       className="bg-[#6B9B84]"
       collapsible="icon"
+      variant="sidebar"
       style={
         {
           '--sidebar-background': '#639780',
@@ -103,26 +63,87 @@ export function MainSidebar() {
       }
     >
       <SidebarHeader className="p-4">
-        <img
-          src={userProfile?.profilePicture}
-          alt="Profile"
-          className="place-items-center rounded-full w-16 h-16"
-        />
+        <div className="w-full">
+          <img
+            src={userProfile?.profilePicture}
+            alt="Profile"
+            className="mx-auto rounded-full outline-4 outline-gray-300/40 outline-offset-8 size-20"
+          />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {navigation.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                isActive={item.isActive}
-                className="hover:bg-white/20 data-[active=true]:bg-white/30 py-5 rounded-lg text-background"
-                tooltip={item.title}
-              >
-                {item.component}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={selectedDisplay === SidebarMenuItems.Home}
+              className="hover:bg-white/20 data-[active=true]:bg-white/30 py-5 rounded-lg text-background"
+              tooltip="Home"
+              onClick={() => setSelectedDisplay(SidebarMenuItems.Home)}
+            >
+              <a href="#" className="ml-2 text-xl">
+                <Home className="size-10" />
+                <span>Home</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <Collapsible className="space-y-2 w-auto max-w-full">
+              <CollapsibleTrigger className="w-full">
+                <SidebarMenuButton
+                  asChild
+                  isActive={selectedDisplay === SidebarMenuItems.Groups}
+                  className="hover:bg-white/20 data-[active=true]:bg-white/30 py-5 rounded-lg text-background"
+                  tooltip="Home"
+                  onClick={() => setSelectedDisplay(SidebarMenuItems.Groups)}
+                >
+                  <a
+                    href="#"
+                    className="flex justify-between items-center ml-2 text-xl"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Users className="size-6" />
+                      <span>Groups</span>
+                    </div>
+                    <ChevronDown className="w-4 h-4" />
+                  </a>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 pl-2">
+                {groups.map((group) => (
+                  <SidebarMenuSub key={group.id}>
+                    <div
+                      className={
+                        'hover:bg-background/50 px-3 py-2 rounded-md font-mono text-background text-sm' +
+                        (selectedDisplay === group.id
+                          ? ' bg-background/30'
+                          : '')
+                      }
+                      onClick={() => {
+                        setSelectedDisplay(group.id);
+                      }}
+                    >
+                      {group.name}
+                    </div>
+                  </SidebarMenuSub>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="hover:bg-white/20 data-[active=true]:bg-white/30 py-5 rounded-lg text-background"
+              tooltip="Profile"
+              onClick={() => setSelectedDisplay(SidebarMenuItems.Profile)}
+              isActive={selectedDisplay === SidebarMenuItems.Profile}
+            >
+              <a href="#" className="ml-2 text-xl">
+                <User2Icon className="size-10" />
+                <span>Profile</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
