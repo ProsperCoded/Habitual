@@ -12,9 +12,10 @@ export const DRIZZLE_SYMBOL = Symbol('Drizzle');
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const DB_URL = configService.get('DATABASE_URL');
+        console.log({ DB_URL });
         const pool = new Pool({
           connectionString: DB_URL,
-          ssl: true, //todo: remove this line if you are not using heroku,
+          // ssl: false, //todo: remove this line if you are not using heroku,
         });
         return drizzle(pool, { schema }) as DrizzleDB;
       },

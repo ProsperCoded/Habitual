@@ -11,7 +11,7 @@ export async function getUserProfile(errorLogger: (error: any) => void) {
   });
   const responseData = await response.json();
   if (!response.ok) {
-    errorLogger(responseData.error);
+    errorLogger(responseData.error || responseData.message);
     return;
   }
 

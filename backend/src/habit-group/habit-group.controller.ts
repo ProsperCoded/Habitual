@@ -24,7 +24,7 @@ export class HabitGroupController {
   @Get()
   async findAll(): Promise<ServerResponse<HabitEntity[]>> {
     const habitGroups = await this.habitGroupService.findAll();
-    let message = 'Successfully fetched all habit grous';
+    let message = 'Successfully fetched all habit groups';
     return { message, data: habitGroups };
   }
   @Post()

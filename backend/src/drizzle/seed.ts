@@ -9,22 +9,21 @@ const pool = new Pool({
 });
 const db = drizzle(pool, { schema }) as NodePgDatabase<typeof schema>;
 async function main() {
-  // const userIds = await Promise.all(
-  //   Array(50)
-  //     .fill(0)
-  //     .map(async (_, i) => {
-  //       const user = await db
-  //         .insert(schema.users)
-  //         .values({
-  //           firstName: faker.person.firstName(),
-  //           lastName: faker.person.lastName(),
-  //           email: faker.internet.email(),
-  //           password: faker.internet.password(),
-  //         })
-  //         .returning();
-  //       return user[0].id;
-  //     }),
-  // );
+  const userIds = await Promise.all(
+    Array(50)
+      .fill(0)
+      .map(async (_, i) => {
+        const user = await db
+          .insert(schema.user)
+          .values({
+            firstName: faker.person.firstName(),
+            lastName: faker.person.lastName(),
+            email: faker.internet.email(),
+          })
+          .returning();
+        return user[0].id;
+      }),
+  );
   const habitids = await Promise.all(
     Array(20)
       .fill(0)

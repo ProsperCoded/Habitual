@@ -5,6 +5,7 @@ import Home from '@/pages/home/Home';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Auth from '@/pages/Auth';
 import HabitGroups from '@/pages/groups/Groups';
+import DashboardPage from '@/pages/dashboard/sections/Dashboard';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/groups" element={<HabitGroups />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="auth/:id" element={<Auth />} />
           </Routes>
         </ContextWrapper>
