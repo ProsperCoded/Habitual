@@ -34,7 +34,19 @@ export class HabitGroupService {
       });
     }
   }
-
+  async findUserGroups(userId: string) {
+    const groupMembers = await this.db.query.GroupMembers.findMany({
+      where: (table, { eq }) => eq(table.userId, +userId),
+      with: {
+        group: {
+          with: {
+            habit: true,
+          },
+        },
+      },
+    });
+    return groupMembers.map(({ group }) => group);
+  }
   async findAll(includePrivate = false) {
     try {
       const habitGroups = await this.db.query.habitGroup.findMany({
@@ -44,11 +56,7 @@ export class HabitGroupService {
         with: {
           creator: true,
           habit: true,
-          members: {
-            // with: {
-            //   user: true,
-            // },
-          },
+          members: true,
         },
       });
       return habitGroups;

@@ -10,13 +10,17 @@ export const DRIZZLE_SYMBOL = Symbol('Drizzle');
     {
       provide: DRIZZLE_SYMBOL,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
+      useFactory: async (configService: ConfigService) => {
         const DB_URL = configService.get('DATABASE_URL');
         console.log({ DB_URL });
         const pool = new Pool({
           connectionString: DB_URL,
-          // ssl: false, //todo: remove this line if you are not using heroku,
+          ssl: true,
+          connectionTimeoutMillis: 50000,
+          idleTimeoutMillis: 100000, // Adjust idle timeout
+          max: 10, // Maximum connections in the pool
         });
+        // await pool.connect(); //this isn't needed because drizzle connects to the pool automatically
         return drizzle(pool, { schema }) as DrizzleDB;
       },
     },

@@ -21,7 +21,17 @@ import { HabitEntity } from 'src/habit-group/entities/habit-group.entity';
 export class HabitGroupController {
   constructor(private readonly habitGroupService: HabitGroupService) {}
 
-  @Get()
+  @Get('')
+  @UseGuards(JWTGuard)
+  async findUserGroups(
+    @Req() req: Request,
+  ): Promise<ServerResponse<HabitEntity[]>> {
+    const { id } = req.user as { id: string };
+    const habitGroups = await this.habitGroupService.findUserGroups(id);
+    let message = 'Successfully fetched all habit groups';
+    return { message, data: habitGroups };
+  }
+  @Get('all')
   async findAll(): Promise<ServerResponse<HabitEntity[]>> {
     const habitGroups = await this.habitGroupService.findAll();
     let message = 'Successfully fetched all habit groups';
