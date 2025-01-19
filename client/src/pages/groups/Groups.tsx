@@ -1,4 +1,4 @@
-import { getHabitGroups, joinHabitGroup } from '@/api/habitGroupApi';
+import { getAllHabitGroups, joinHabitGroup } from '@/api/habitGroupApi';
 import { MESSAGE_API_CONTEXT } from '@/context/Contexts';
 import GroupsDisplay from '@/pages/groups/sections/GroupsDisplay';
 import Navbar from '@/pages/groups/sections/Navbar';
@@ -20,7 +20,7 @@ export default function HabitGroups() {
     }
   };
   async function fetchGroups() {
-    getHabitGroups().then((data) => {
+    getAllHabitGroups().then((data) => {
       if (!data) return;
       setGroups(data);
     });

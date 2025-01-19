@@ -1,6 +1,6 @@
 import { SERVER_BASE_URL } from '@/utils/config';
-export async function getHabitGroups(errorLogger = (error: string) => {}) {
-  const url = new URL('/habit-group', SERVER_BASE_URL);
+export async function getAllHabitGroups(errorLogger = (error: string) => {}) {
+  const url = new URL('/habit-group/all', SERVER_BASE_URL);
   const response = await fetch(url, {
     credentials: 'include',
     method: 'GET',
@@ -28,4 +28,17 @@ export async function joinHabitGroup(
     return;
   }
   return responseData;
+}
+export async function getUserGroups(errorLogger = (error: string) => {}) {
+  const url = new URL('/habit-group', SERVER_BASE_URL);
+  const response = await fetch(url, {
+    credentials: 'include',
+    method: 'GET',
+  });
+  const responseData = await response.json();
+  if (!response.ok) {
+    errorLogger(responseData.message);
+    return;
+  }
+  return responseData.data;
 }

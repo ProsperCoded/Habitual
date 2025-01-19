@@ -5,7 +5,7 @@ import Home from '@/pages/home/Home';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Auth from '@/pages/Auth';
 import HabitGroups from '@/pages/groups/Groups';
-import DashboardPage from '@/pages/dashboard/sections/Dashboard';
+import DashboardPage from '@/pages/dashboard/Dashboard';
 
 function App() {
   return (
