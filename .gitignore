@@ -29,4 +29,3 @@ coverage/
 
 # Ignore UML files 
 *.excalidraw
-pnpm-lock.yaml
