@@ -6,6 +6,9 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { HabitGroupModule } from './habit-group/habit-group.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { HabitModule } from './habit/habit.module';
 import googleOauthConfig from 'src/config/google-oauth.config';
 import jwtConfig from 'src/config/jwt.config';
 import config from 'src/config/config';
@@ -21,6 +24,10 @@ import config from 'src/config/config';
     }),
     AuthModule,
     HabitGroupModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'docs'),
+    }),
+    HabitModule,
   ],
   controllers: [AppController],
   providers: [AppService],

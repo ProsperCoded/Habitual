@@ -8,20 +8,23 @@ import { habitGroup } from 'src/drizzle/schema/habitGroup.schema';
 import { ServerResponse } from 'src/lib/types';
 import { GroupMembers } from 'src/drizzle/schema/groupMembers.schema';
 import { and, eq } from 'drizzle-orm';
+import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
 @Injectable()
 export class HabitGroupService {
   constructor(
     private readonly userService: UserService,
-    @Inject(DRIZZLE_SYMBOL) private db: DrizzleDB,
+    @Inject(DRIZZLE_SYMBOL) private readonly db: DrizzleDB,
   ) {}
   async create(userId: string, createHabitGroupDto: CreateHabitGroupDto) {
     try {
-      const createdGroup = await this.db
+      const createdGroups = await this.db
         .insert(habitGroup)
         .values([{ ...createHabitGroupDto, creatorId: +userId }])
         .returning();
-      console.log(createdGroup);
-      return createdGroup[0];
+      const createdGroup = createdGroups[0];
+      // ? Join the group, as the creator
+      await this.joinGroup(userId, createdGroup.id.toString());
+      return createdGroup;
     } catch (error) {
       console.error(error);
       const response: ServerResponse<null> = {
@@ -46,6 +49,33 @@ export class HabitGroupService {
       },
     });
     return groupMembers.map(({ group }) => group);
+  }
+  async findOne(id: string) {
+    try {
+      const habitGroup = await this.db.query.habitGroup.findFirst({
+        where: (table, { eq }) => eq(table.id, +id),
+        with: {
+          creator: true,
+          habit: true,
+          members: {
+            with: {
+              user: true,
+            },
+          },
+        },
+      });
+      return habitGroup;
+    } catch (error) {
+      console.error(error);
+      const response: ServerResponse<null> = {
+        message: 'Failed to fetch habit group',
+        data: null,
+        error: error.message,
+      };
+      throw new BadRequestException(response, {
+        cause: error,
+      });
+    }
   }
   async findAll(includePrivate = false) {
     try {
@@ -84,20 +114,16 @@ export class HabitGroupService {
       const response: ServerResponse<null> = {
         message: 'Failed to join habit group',
         data: null,
-        error: error.message,
+        error: error.detail || error.message,
       };
       throw new BadRequestException(response, {
         cause: error,
       });
     }
   }
-  async leaveGroup(userId: string, groupId: string) {
+  async leaveGroup(userId: string, groupId: string): Promise<HabitGroupEntity> {
     try {
-      // const response = await this.db
-      //   .delete(GroupMembers)
-      //   .where((table, { eq, and }) =>
-      //     and(eq(table.userId, +userId), eq(table.groupId, +groupId)),
-      //   );
+      console.log({ userId, groupId });
       const response = await this.db
         .delete(GroupMembers)
         .where(
@@ -106,11 +132,47 @@ export class HabitGroupService {
             eq(GroupMembers.groupId, +groupId),
           ),
         );
-      return response;
+      if (!response.rowCount) {
+        throw new Error("User not part of group or group doesn't exists ");
+      }
+      console.log({ response });
+      // ? Fetch group associated with it
+      const group = await this.db.query.habitGroup.findFirst({
+        where: (table, { eq }) => eq(table.id, +groupId),
+        with: {
+          members: true,
+        },
+      });
+      return group;
     } catch (error) {
       console.error(error);
       const response: ServerResponse<null> = {
         message: 'Failed to leave habit group',
+        data: null,
+        error: error.message,
+      };
+      throw new BadRequestException(response, {
+        cause: error,
+      });
+    }
+  }
+  async deleteGroup(userId: string, groupId: string) {
+    try {
+      const response = await this.db
+        .delete(habitGroup)
+        .where(
+          and(eq(habitGroup.id, +groupId), eq(habitGroup.creatorId, +userId)),
+        );
+
+      // * Delete all members of this group
+      await this.db
+        .delete(GroupMembers)
+        .where(eq(GroupMembers.groupId, +groupId));
+      return response;
+    } catch (error) {
+      console.error(error);
+      const response: ServerResponse<null> = {
+        message: 'Failed to delete habit group, or ensure you are the creator',
         data: null,
         error: error.message,
       };

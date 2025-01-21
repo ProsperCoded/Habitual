@@ -25,7 +25,7 @@ export class AuthService {
       console.error('User does not exist');
       throw new BadRequestException('User does not exist');
     }
-    const token = await this.jwtService.signAsync({ sub: existingUser.id });
+    const token = await this.generateToken(existingUser.id);
     const payload = { id: existingUser.id.toString(), token };
     return payload;
   }
@@ -37,6 +37,9 @@ export class AuthService {
     return payload;
   }
 
+  async generateToken(userId: number) {
+    return await this.jwtService.signAsync({ sub: userId });
+  }
   // process user signup/login after accepting google consent page
   async validateGoogleOAuthUser(user: CreateUserDto) {
     const existingUser = await this.usersService.findByEmail(user.email);

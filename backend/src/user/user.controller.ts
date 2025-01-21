@@ -14,7 +14,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JWTGuard } from 'src/auth/jwt.guard';
 import { Request } from 'express';
-import { ServerResponse, UserPayload } from 'src/lib/types';
+import { ServerResponse } from 'src/lib/types';
 import { UserEntity } from 'src/user/entities/user.entity';
 
 @Controller('user')

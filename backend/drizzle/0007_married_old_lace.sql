@@ -1,0 +1,1 @@
+ALTER TABLE "habitGroup" ALTER COLUMN "startDate" SET DEFAULT '2025-01-21';

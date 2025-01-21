@@ -15,12 +15,12 @@ export const DRIZZLE_SYMBOL = Symbol('Drizzle');
         console.log({ DB_URL });
         const pool = new Pool({
           connectionString: DB_URL,
-          ssl: true,
-          connectionTimeoutMillis: 50000,
-          idleTimeoutMillis: 100000, // Adjust idle timeout
-          max: 10, // Maximum connections in the pool
+          ssl: {
+            rejectUnauthorized: false,
+          },
+          connectionTimeoutMillis: 30000,
         });
-        // await pool.connect(); //this isn't needed because drizzle connects to the pool automatically
+        await pool.connect(); //this isn't needed because drizzle connects to the pool automatically
         return drizzle(pool, { schema }) as DrizzleDB;
       },
     },

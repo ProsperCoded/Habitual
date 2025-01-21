@@ -10,11 +10,11 @@ import { user } from './users.schema';
 import { relations } from 'drizzle-orm';
 import { integer } from 'drizzle-orm/pg-core';
 
-export const HabitState = pgEnum('habitState', ['private', 'public']);
+// export const HabitState = pgEnum('habitState', ['private', 'public']);
 export const habit = pgTable('habits', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
-  habitState: HabitState('habitState').notNull(),
+  // habitState: HabitState('habitState').notNull(),
   description: text('description').notNull(),
   creatorId: integer('creatorId')
     .notNull()

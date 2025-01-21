@@ -6,6 +6,7 @@ import {
   Res,
   Req,
   Inject,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -15,6 +16,7 @@ import { Request, Response } from 'express';
 import { UserService } from 'src/user/user.service';
 import { ConfigType } from '@nestjs/config';
 import * as moment from 'moment';
+import { JWTGuard } from 'src/auth/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +28,7 @@ export class AuthController {
   ) {}
 
   @Post('logout')
+  @UseGuards(JWTGuard)
   async logout(
     @Res({ passthrough: true }) res: Response,
   ): Promise<ServerResponse<null>> {
@@ -49,5 +52,10 @@ export class AuthController {
     res.redirect(302, url.toString());
     // Todo: Store token as cookie and return the user
     // res.redirect(url.host);
+  }
+  // ! Only for testing
+  @Get('request-token/:id')
+  generateToken(@Param('id') id: string) {
+    return this.authService.generateToken(+id);
   }
 }

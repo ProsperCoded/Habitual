@@ -5,7 +5,7 @@ import * as schema from './schema/schema';
 import { faker } from '@faker-js/faker';
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: true,
+  // ssl: true,
 });
 const db = drizzle(pool, { schema }) as NodePgDatabase<typeof schema>;
 async function main() {
@@ -34,7 +34,6 @@ async function main() {
             name: faker.lorem.word(),
             description: faker.lorem.sentence(),
             creatorId: i + 1,
-            habitState: 'public',
           })
           .returning();
         return habit[0].id;
