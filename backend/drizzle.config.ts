@@ -6,7 +6,7 @@ const options: Config = {
   dialect: 'postgresql',
   dbCredentials: {
     // Append the timeout setting to your connection string
-    url: `${process.env.DATABASE_URL}`,
+    url: `${process.env.DATABASE_URL_DEV}`,
     ssl: true,
   },
 };
