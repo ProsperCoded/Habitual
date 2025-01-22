@@ -7,6 +7,7 @@ import {
   IsIn,
   ValidationOptions,
   registerDecorator,
+  IsTimeZone,
 } from 'class-validator';
 
 export class CreateHabitGroupDto {
@@ -31,6 +32,16 @@ export class CreateHabitGroupDto {
   startDate: string;
 
   @IsNotEmpty()
+  @IsString()
+  @IsTimeFormat({
+    message: 'Time must be in the format "HH:MM:SS"',
+  })
+  executionTime: string;
+
+  @IsInt()
+  tolerance: number;
+
+  @IsNotEmpty()
   @IsOptional()
   @IsValidInterval({
     message: 'Interval must be in the format "number unit" (e.g., "7 days")',
@@ -48,6 +59,22 @@ export function IsValidInterval(validationOptions?: ValidationOptions) {
       validator: {
         validate(value: string) {
           const regex = RegExp('^[0-9]+ [A-Za-z]+$');
+          return regex.test(value);
+        },
+      },
+    });
+  };
+}
+export function IsTimeFormat(validationOptions?: ValidationOptions) {
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'IsTimeFormat',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: string) {
+          const regex = RegExp('^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$');
           return regex.test(value);
         },
       },

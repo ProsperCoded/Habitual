@@ -8,7 +8,7 @@ import { CreateHabitDto } from './dto/create-habit.dto';
 import { UpdateHabitDto } from './dto/update-habit.dto';
 import { DRIZZLE_SYMBOL } from 'src/drizzle/drizzle.module';
 import { DrizzleDB } from 'src/lib/types';
-import { habit, habit as habitSchema } from 'src/drizzle/schema/habits.schema';
+import { habit, habit as habitSchema } from 'src/drizzle/schema/habit.schema';
 import { and, eq } from 'drizzle-orm';
 
 @Injectable()

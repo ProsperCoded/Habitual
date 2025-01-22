@@ -2,7 +2,7 @@ import { integer, pgTable, primaryKey } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { habitGroup } from './habitGroup.schema';
 import { user } from './users.schema';
-export const GroupMembers = pgTable(
+export const groupMember = pgTable(
   'groupMembers',
   {
     userId: integer('userId')
@@ -21,13 +21,13 @@ export const GroupMembers = pgTable(
 );
 
 // Define relations
-export const groupMembersRelations = relations(GroupMembers, ({ one }) => ({
+export const groupMembersRelations = relations(groupMember, ({ one }) => ({
   user: one(user, {
-    fields: [GroupMembers.userId],
+    fields: [groupMember.userId],
     references: [user.id],
   }),
   group: one(habitGroup, {
-    fields: [GroupMembers.groupId],
+    fields: [groupMember.groupId],
     references: [habitGroup.id],
   }),
 }));

@@ -1,0 +1,1 @@
+ALTER TABLE "habitGroup" ADD COLUMN "tolerance" integer DEFAULT 0 NOT NULL;

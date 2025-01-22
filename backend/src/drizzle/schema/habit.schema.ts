@@ -1,14 +1,8 @@
-import {
-  index,
-  pgEnum,
-  pgTable,
-  primaryKey,
-  serial,
-  text,
-} from 'drizzle-orm/pg-core';
+import { index, pgTable, primaryKey, serial, text } from 'drizzle-orm/pg-core';
 import { user } from './users.schema';
 import { relations } from 'drizzle-orm';
 import { integer } from 'drizzle-orm/pg-core';
+import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
 
 // export const HabitState = pgEnum('habitState', ['private', 'public']);
 export const habit = pgTable('habits', {
@@ -37,7 +31,7 @@ export const habitActiveUsers = pgTable(
       columns: [table.habitId, table.userId],
       name: 'habitActiveUsers_pk',
     }),
-    useridIndex: index('userIdIndex').on(table.userId),
+    userIdIndex: index('userIdIndex').on(table.userId),
   }),
 );
 

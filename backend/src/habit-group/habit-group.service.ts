@@ -6,7 +6,7 @@ import { DRIZZLE_SYMBOL } from 'src/drizzle/drizzle.module';
 import { DrizzleDB } from 'src/lib/types';
 import { habitGroup } from 'src/drizzle/schema/habitGroup.schema';
 import { ServerResponse } from 'src/lib/types';
-import { GroupMembers } from 'src/drizzle/schema/groupMembers.schema';
+import { groupMember } from 'src/drizzle/schema/groupMembers.schema';
 import { and, eq } from 'drizzle-orm';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
 @Injectable()
@@ -38,7 +38,7 @@ export class HabitGroupService {
     }
   }
   async findUserGroups(userId: string) {
-    const groupMembers = await this.db.query.GroupMembers.findMany({
+    const groupMembers = await this.db.query.groupMember.findMany({
       where: (table, { eq }) => eq(table.userId, +userId),
       with: {
         group: {
@@ -106,7 +106,7 @@ export class HabitGroupService {
   async joinGroup(userId: string, groupId: string) {
     try {
       const response = await this.db
-        .insert(GroupMembers)
+        .insert(groupMember)
         .values([{ userId: +userId, groupId: +groupId }]);
       return response;
     } catch (error) {
@@ -125,11 +125,11 @@ export class HabitGroupService {
     try {
       console.log({ userId, groupId });
       const response = await this.db
-        .delete(GroupMembers)
+        .delete(groupMember)
         .where(
           and(
-            eq(GroupMembers.userId, +userId),
-            eq(GroupMembers.groupId, +groupId),
+            eq(groupMember.userId, +userId),
+            eq(groupMember.groupId, +groupId),
           ),
         );
       if (!response.rowCount) {
@@ -166,8 +166,8 @@ export class HabitGroupService {
 
       // * Delete all members of this group
       await this.db
-        .delete(GroupMembers)
-        .where(eq(GroupMembers.groupId, +groupId));
+        .delete(groupMember)
+        .where(eq(groupMember.groupId, +groupId));
       return response;
     } catch (error) {
       console.error(error);

@@ -8,28 +8,29 @@ import {
   text,
   time,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { habit } from './habits.schema';
+import { relations, sql } from 'drizzle-orm';
+import { habit } from './habit.schema';
 import { user } from './users.schema';
-import { GroupMembers } from './groupMembers.schema';
+import { groupMember } from './groupMembers.schema';
+import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
 export const groupState = pgEnum('groupState', ['private', 'public']);
 // Habit group table
-function getDefaultDate() {
-  return new Date().toISOString().split('T')[0];
-}
-
-function getDefaultTime() {
-  return new Date().toTimeString().split(' ')[0];
-}
-
 export const habitGroup = pgTable('habitGroup', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description').notNull(),
   groupState: groupState('groupState').notNull(),
   habitId: integer('habitId').references(() => habit.id),
-  startDate: date('startDate').default(getDefaultDate()).notNull(),
-  // startTime: time('startTime').default(getDefaultTime()).notNull(),
+  startDate: date('startDate')
+    .default(sql`CURRENT_DATE`)
+    .notNull(),
+  executionTime: time('time')
+    .default(sql`CURRENT_TIME`)
+    .notNull(),
+
+  // tolerance will be a number after executeTime, that habit acknoledgement can still occur
+  // seconds
+  tolerance: integer('tolerance').default(0).notNull(),
   interval: interval('interval').default('1 day').notNull(),
   creatorId: integer('creatorId')
     .notNull()
@@ -46,5 +47,7 @@ export const habitGroupRelations = relations(habitGroup, ({ one, many }) => ({
     fields: [habitGroup.habitId],
     references: [habit.id],
   }),
-  members: many(GroupMembers),
+  members: many(groupMember),
+
+  groupExecutionsLogs: many(executionLogs),
 }));
