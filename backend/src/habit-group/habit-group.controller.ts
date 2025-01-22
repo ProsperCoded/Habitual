@@ -40,8 +40,13 @@ export class HabitGroupController {
     return { message, data: habitGroups };
   }
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: string): HabitGroupResponse {
-    const habitGroup = await this.habitGroupService.findOne(id);
+  @UseGuards(JWTGuard)
+  async findOne(
+    @Param('id', ParseIntPipe) id: string,
+    @Req() req: Request,
+  ): HabitGroupResponse {
+    const { id: userId } = req.user as { id: string };
+    const habitGroup = await this.habitGroupService.findOne(userId, id);
     if (!habitGroup) {
       throw new NotFoundException('Habit Group not found');
     }
@@ -113,7 +118,7 @@ export class HabitGroupController {
   async executeHabit(
     @Req() req: Request,
     @Param('id', ParseIntPipe) groupId: string,
-  ): HabitGroupResponse {
+  ): Promise<ServerResponse<any>> {
     const { id: userId } = req.user as { id: string };
     const executionLog = await this.habitGroupService.executeHabit(
       userId,

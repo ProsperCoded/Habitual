@@ -8,11 +8,11 @@ import { CreateHabitGroupDto } from './dto/create-habit-group.dto';
 import { UpdateHabitGroupDto } from './dto/update-habit-group.dto';
 import { UserService } from 'src/user/user.service';
 import { DRIZZLE_SYMBOL } from 'src/drizzle/drizzle.module';
-import { DrizzleDB } from 'src/lib/types';
+import { DrizzleDB, ExecutionLogsEntity } from 'src/lib/types';
 import { habitGroup } from 'src/drizzle/schema/habitGroup.schema';
 import { ServerResponse } from 'src/lib/types';
 import { groupMember } from 'src/drizzle/schema/groupMembers.schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, InferSelectModel } from 'drizzle-orm';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
 import * as moment from 'moment';
 import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
@@ -79,10 +79,10 @@ export class HabitGroupService {
     });
     return groupMembers.map(({ group }) => group);
   }
-  async findOne(id: string) {
+  async findOne(userId: string, groupId: string) {
     try {
-      const habitGroup = await this.db.query.habitGroup.findFirst({
-        where: (table, { eq }) => eq(table.id, +id),
+      const habitGroup = (await this.db.query.habitGroup.findFirst({
+        where: (table, { eq }) => eq(table.id, +groupId),
         with: {
           creator: true,
           habit: true,
@@ -92,7 +92,18 @@ export class HabitGroupService {
             },
           },
         },
-      });
+      })) as HabitGroupEntity;
+      try {
+        const shouldExecute = await this.shouldExecute(userId, habitGroup);
+        habitGroup.execute = {
+          shouldExecute,
+        };
+      } catch (error) {
+        habitGroup.execute = {
+          shouldExecute: false,
+          error: error.message,
+        };
+      }
       return habitGroup;
     } catch (error) {
       console.error(error);
@@ -226,42 +237,40 @@ export class HabitGroupService {
    * 5. If the habit is scheduled for today, checks if the current time is within the allowed execution time window.
    * 6. If the current time is within the allowed window, logs the habit execution in the database.
    */
-  async executeHabit(userId: string, groupId: string) {
+  async shouldExecute(userId: string, group: HabitGroupEntity) {
     const currentDate = moment();
     console.log('Current Time:', currentDate.format());
 
-    const group = await this.db.query.habitGroup.findFirst({
-      where: (table, { eq }) => eq(table.id, +groupId),
-    });
-    if (!group) {
-      console.log('Group not found');
-      throw new NotFoundException('Group not found');
+    const shouldExecuteHabit = await this.checkPreviousExecutions(
+      userId,
+      group,
+    );
+    if (!shouldExecuteHabit) {
+      throw new BadRequestException({
+        message: 'You have already executed a habit within the interval',
+        cause: '',
+      });
     }
-    console.log('Group:', group);
 
     const startDate = moment(group.startDate, 'YYYY-MM-DD');
 
     if (startDate.isAfter(currentDate)) {
-      throw new BadRequestException('Habit group has not started yet');
+      throw new BadRequestException({
+        message: 'Habit group has not started yet habit',
+      });
     }
 
     const diff = startDate.diff(currentDate, 'days');
     console.log('Days since start date:', diff);
 
-    const valueRegex = RegExp('^[0-9]+');
-    const quantityRegex = RegExp('(days?)|(weeks?)|(months?)|(years?)$');
-    const interval = {
-      value: group.interval.match(valueRegex)[0],
-      quantity: group.interval.match(quantityRegex)[0],
-    };
+    const interval = this.parseInterval(group.interval);
     console.log('Interval:', interval);
 
     // * convert the interval to days
-    const intervalInDays = moment
-      .duration({
-        [interval.quantity]: interval.value,
-      })
-      .asDays();
+    const intervalInDays = this.getIntervalDays(
+      interval.value,
+      interval.quantity,
+    );
     console.log('Interval in days:', intervalInDays);
 
     // * Determines if the habit is scheduled for today based on the interval.
@@ -286,18 +295,7 @@ export class HabitGroupService {
       // * checks if the current time is within the allowed execution time window.
       if (currentDate.isBetween(executionDate, maxTolerance)) {
         // * Insert into execution logs
-        const executionLog = await this.db
-          .insert(executionLogs)
-          .values([
-            {
-              userId: +userId,
-              groupId: +groupId,
-              completionTime: currentDate.toDate(),
-            },
-          ])
-          .returning()[0];
-        console.log('Execution Log:', executionLog);
-        return executionLog;
+        return true;
       } else {
         console.log('Habit execution time has passed');
         throw new BadRequestException('Habit execution time has passed');
@@ -305,6 +303,97 @@ export class HabitGroupService {
     } else {
       console.log('Habit not scheduled for today');
       throw new BadRequestException('Habit not scheduled for today');
+    }
+  }
+
+  private parseInterval(interval: string) {
+    const valueRegex = RegExp('^[0-9]+');
+    const quantityRegex = RegExp('(days?)|(weeks?)|(months?)|(years?)$');
+    return {
+      value: interval.match(valueRegex)[0],
+      quantity: interval.match(quantityRegex)[0],
+    };
+  }
+
+  private getIntervalDays(value: string, quantity: string): number {
+    return moment.duration({ [quantity]: value }).asDays();
+  }
+
+  // ? Ensures user can't execute within interval after previously executing a habit
+  private async checkPreviousExecutions(
+    userId: string,
+    group: HabitGroupEntity,
+  ) {
+    const lastExecution = (
+      await this.db.query.executionLogs.findMany({
+        where: (table, { and, eq }) =>
+          and(eq(table.userId, +userId), eq(table.groupId, +group.id)),
+        orderBy: (table, { desc }) => desc(table.completionTime),
+      })
+    )[0] as ExecutionLogsEntity;
+    console.log('Last Execution:', lastExecution);
+    if (!lastExecution) return true;
+    const lastDateExecuted = moment(lastExecution.completionTime);
+    const executionTime = moment(group.executionTime, 'HH:mm:ss');
+
+    // * removing the extra time from the last execution
+    lastDateExecuted.set({
+      hour: executionTime.hour(),
+      minute: executionTime.minute(),
+      second: executionTime.second(),
+    });
+    console.log('Last Date Executed:', lastDateExecuted.format());
+
+    // *Ensuring user can't execute within interval after previously executing a habit
+    const interval = this.parseInterval(group.interval);
+    console.log('Interval:', interval);
+
+    // * convert the interval to days
+    const intervalInDays = this.getIntervalDays(
+      interval.value,
+      interval.quantity,
+    );
+    console.log('Interval in Days:', intervalInDays);
+    const dateToNextExecute = moment(lastDateExecuted).add(
+      intervalInDays,
+      'days',
+    );
+    console.log('Date to Next Execute:', dateToNextExecute.format());
+    const today = moment();
+    console.log('Today:', today.format());
+
+    if (dateToNextExecute.isAfter(today)) {
+      console.log('Cannot execute habit yet');
+      return false;
+    }
+    console.log('Can execute habit');
+    return true;
+  }
+  async executeHabit(userId: string, groupId: string) {
+    const group = await this.db.query.habitGroup.findFirst({
+      where: (table, { eq }) => eq(table.id, +groupId),
+    });
+    if (!group) {
+      console.log('Group not found');
+      throw new NotFoundException('Group not found');
+    }
+    console.log('Group:', group);
+    const shouldExecute = await this.shouldExecute(userId, group);
+    if (shouldExecute) {
+      const executionLog = (
+        await this.db
+          .insert(executionLogs)
+          .values([
+            {
+              userId: +userId,
+              groupId: +group.id,
+              completionTime: new Date(),
+            },
+          ])
+          .returning()
+      )[0];
+      console.log('Execution Log:', executionLog);
+      return executionLog;
     }
   }
 }
