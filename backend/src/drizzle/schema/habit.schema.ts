@@ -2,7 +2,6 @@ import { index, pgTable, primaryKey, serial, text } from 'drizzle-orm/pg-core';
 import { user } from './users.schema';
 import { relations } from 'drizzle-orm';
 import { integer } from 'drizzle-orm/pg-core';
-import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
 
 // export const HabitState = pgEnum('habitState', ['private', 'public']);
 export const habit = pgTable('habits', {

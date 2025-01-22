@@ -44,6 +44,28 @@ export class HabitGroupService {
       });
     }
   }
+  async update(userId: string, groupId: string, dto: UpdateHabitGroupDto) {
+    try {
+      const response = await this.db
+        .update(habitGroup)
+        .set(dto)
+        .where(
+          and(eq(habitGroup.id, +groupId), eq(habitGroup.creatorId, +userId)),
+        )
+        .returning();
+      return response[0];
+    } catch (error) {
+      console.error(error);
+      const response: ServerResponse<null> = {
+        message: 'Failed to update habit group, or ensure you are the creator',
+        data: null,
+        error: error.message,
+      };
+      throw new BadRequestException(response, {
+        cause: error,
+      });
+    }
+  }
   async findUserGroups(userId: string) {
     const groupMembers = await this.db.query.groupMember.findMany({
       where: (table, { eq }) => eq(table.userId, +userId),
@@ -218,6 +240,11 @@ export class HabitGroupService {
     console.log('Group:', group);
 
     const startDate = moment(group.startDate, 'YYYY-MM-DD');
+
+    if (startDate.isAfter(currentDate)) {
+      throw new BadRequestException('Habit group has not started yet');
+    }
+
     const diff = startDate.diff(currentDate, 'days');
     console.log('Days since start date:', diff);
 
@@ -253,6 +280,7 @@ export class HabitGroupService {
         'seconds',
       );
       console.log('Execution Date:', executionDate.format());
+      console.log('Current Time:', currentDate.format());
       console.log('Max Tolerance:', maxTolerance.format());
 
       // * checks if the current time is within the allowed execution time window.

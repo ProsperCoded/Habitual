@@ -71,6 +71,20 @@
       "when": 1737542763200,
       "tag": "0009_curly_silver_samurai",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1737551627790,
+      "tag": "0010_uneven_ultragirl",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1737555507210,
+      "tag": "0011_clammy_moonstone",
+      "breakpoints": true
     }
   ]
 }

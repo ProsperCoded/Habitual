@@ -17,6 +17,7 @@ import { JWTGuard } from 'src/auth/jwt.guard';
 import { Request } from 'express';
 import { ServerResponse } from 'src/lib/types';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
+import { UpdateHabitGroupDto } from 'src/habit-group/dto/update-habit-group.dto';
 
 type HabitGroupResponse = Promise<ServerResponse<HabitGroupEntity>>;
 type HabitsGroupResponse = Promise<ServerResponse<HabitGroupEntity[]>>;
@@ -62,7 +63,18 @@ export class HabitGroupController {
     return { message, data: createdGroup };
   }
 
+  @Put(':id')
   @Put('/join-group/:id')
+  @UseGuards(JWTGuard)
+  async update(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) groupId: string,
+    @Body() dto: UpdateHabitGroupDto,
+  ): HabitGroupResponse {
+    const userId = (req.user as { id: string }).id;
+    const updated = await this.habitGroupService.update(userId, groupId, dto);
+    return { message: 'Successfully updated habit group', data: updated };
+  }
   @UseGuards(JWTGuard)
   async joinGroup(
     @Req() req: Request,
