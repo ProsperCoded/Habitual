@@ -95,4 +95,19 @@ export class HabitGroupController {
     let message = 'Successfully deleted habit group';
     return { message, data: null };
   }
+
+  @Post('execute-habit/:id')
+  @UseGuards(JWTGuard)
+  async executeHabit(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) groupId: string,
+  ): HabitGroupResponse {
+    const { id: userId } = req.user as { id: string };
+    const executionLog = await this.habitGroupService.executeHabit(
+      userId,
+      groupId,
+    );
+    let message = 'Successfully executed habit';
+    return { message, data: executionLog };
+  }
 }

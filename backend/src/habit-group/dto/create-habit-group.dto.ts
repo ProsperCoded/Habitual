@@ -58,7 +58,7 @@ export function IsValidInterval(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: string) {
-          const regex = RegExp('^[0-9]+ [A-Za-z]+$');
+          const regex = RegExp('^[0-9]+ (days?)|(weeks?)|(months?)|(years?)$');
           return regex.test(value);
         },
       },
