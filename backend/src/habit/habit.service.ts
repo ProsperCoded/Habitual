@@ -60,6 +60,15 @@ export class HabitService {
     }
   }
 
+  async findMine(userId: number) {
+    return await this.db.query.habit.findMany({
+      where: (habits, { eq }) => eq(habits.creatorId, userId),
+      with: {
+        creator: true,
+      },
+    });
+  }
+
   async update(
     userId: number,
     habitId: number,

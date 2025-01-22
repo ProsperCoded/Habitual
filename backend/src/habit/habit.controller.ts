@@ -42,6 +42,16 @@ export class HabitController {
     };
   }
 
+  @Get('mine')
+  @UseGuards(JWTGuard)
+  async findMine(@Req() req: Request): HabitsResponse {
+    const { id } = req.user as { id: string };
+    return {
+      data: await this.habitService.findMine(+id),
+      message: 'Successfully Fetched Your Habits',
+    };
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.habitService.findOne(+id);

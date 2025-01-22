@@ -396,4 +396,23 @@ export class HabitGroupService {
       return executionLog;
     }
   }
+  async getExecutedHabits(userId: string, groupId: string) {
+    const executionLogs = await this.db.query.executionLogs.findMany({
+      where: (table, { and, eq }) =>
+        and(eq(table.userId, +userId), eq(table.groupId, +groupId)),
+      with: {
+        user: true,
+      },
+    });
+    return executionLogs;
+  }
+  async getAllExecuted(userId: string, groupId: string) {
+    const executionLogs = await this.db.query.executionLogs.findMany({
+      where: (table, { eq }) => eq(table.groupId, +groupId),
+      with: {
+        user: true,
+      },
+    });
+    return executionLogs;
+  }
 }

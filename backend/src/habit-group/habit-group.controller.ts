@@ -15,7 +15,7 @@ import { HabitGroupService } from './habit-group.service';
 import { CreateHabitGroupDto } from './dto/create-habit-group.dto';
 import { JWTGuard } from 'src/auth/jwt.guard';
 import { Request } from 'express';
-import { ServerResponse } from 'src/lib/types';
+import { ExecutionLogsEntity, ServerResponse } from 'src/lib/types';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
 import { UpdateHabitGroupDto } from 'src/habit-group/dto/update-habit-group.dto';
 
@@ -113,6 +113,34 @@ export class HabitGroupController {
     return { message, data: null };
   }
 
+  @Get('/executed-logs/user/:id')
+  @UseGuards(JWTGuard)
+  async getExecutedHabits(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) groupId: string,
+  ): Promise<ServerResponse<ExecutionLogsEntity>> {
+    const { id: userId } = req.user as { id: string };
+    const executedHabits = await this.habitGroupService.getExecutedHabits(
+      userId,
+      groupId,
+    );
+    let message = 'Successfully fetched executed habits';
+    return { message, data: executedHabits };
+  }
+  @Get('/executed-logs/:id')
+  @UseGuards(JWTGuard)
+  async getAllExecuted(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) groupId: string,
+  ): Promise<ServerResponse<ExecutionLogsEntity>> {
+    const { id: userId } = req.user as { id: string };
+    const allExecutedHabits = await this.habitGroupService.getAllExecuted(
+      userId,
+      groupId,
+    );
+    let message = 'Successfully fetched executed habits';
+    return { message, data: allExecutedHabits };
+  }
   @Post('execute-habit/:id')
   @UseGuards(JWTGuard)
   async executeHabit(
