@@ -45,6 +45,8 @@ export class AuthController {
     res.cookie('Authorization', user.token, {
       httpOnly: true,
       expires: expiry.toDate(),
+      secure: true,
+      sameSite: 'none',
     });
     const FRONTEND_URL = this.configService.frontEndUrl;
     const url = new URL(`auth/${user.id.toString()}`, FRONTEND_URL);
