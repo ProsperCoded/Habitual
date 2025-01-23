@@ -17,7 +17,9 @@ export class JWTGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest() as Request;
+    console.log('cookies', request.cookies);
     const decoded = this.jwtService.decode(request.cookies.Authorization);
+    console.log({ decoded });
     if (!decoded) return false;
     request.user = { id: decoded.sub };
     return !!decoded;
