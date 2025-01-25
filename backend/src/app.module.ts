@@ -12,6 +12,7 @@ import { HabitModule } from './habit/habit.module';
 import googleOauthConfig from 'src/config/google-oauth.config';
 import jwtConfig from 'src/config/jwt.config';
 import config from 'src/config/config';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     DrizzleModule,
@@ -28,6 +29,7 @@ import config from 'src/config/config';
       rootPath: join(__dirname, 'docs'),
     }),
     HabitModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

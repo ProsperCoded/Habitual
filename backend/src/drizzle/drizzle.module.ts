@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from './schema/schema';
 import { DrizzleDB } from 'src/lib/types';
-export const DRIZZLE_SYMBOL = Symbol('Drizzle');
+import { DrizzleService } from 'src/drizzle/drizzle.service';
+import { DRIZZLE_SYMBOL } from './drizzle.constants';
+
 @Module({
+  imports: [ConfigModule],
   providers: [
     {
       provide: DRIZZLE_SYMBOL,
@@ -37,7 +40,9 @@ export const DRIZZLE_SYMBOL = Symbol('Drizzle');
         return drizzle(pool, { schema }) as DrizzleDB;
       },
     },
+    DrizzleService,
   ],
   exports: [DRIZZLE_SYMBOL],
 })
 export class DrizzleModule {}
+export { DRIZZLE_SYMBOL };
