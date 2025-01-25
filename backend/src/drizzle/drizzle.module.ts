@@ -22,6 +22,15 @@ export const DRIZZLE_SYMBOL = Symbol('Drizzle');
             rejectUnauthorized: false,
           },
           connectionTimeoutMillis: 30000,
+          idleTimeoutMillis: 30000,
+          max: 10,
+        });
+        pool.on('error', async (error: any) => {
+          if (error.code === '57P01') {
+            console.log('reconnecting ...');
+            await pool.connect();
+          }
+          console.log(error);
         });
         await pool.connect(); //this isn't needed because drizzle connects to the pool automatically
         return drizzle(pool, { schema }) as DrizzleDB;
