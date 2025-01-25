@@ -24,6 +24,7 @@ export const DRIZZLE_SYMBOL = Symbol('Drizzle');
           connectionTimeoutMillis: 30000,
           idleTimeoutMillis: 30000,
           max: 10,
+          allowExitOnIdle: false,
         });
         pool.on('error', async (error: any) => {
           if (error.code === '57P01') {
