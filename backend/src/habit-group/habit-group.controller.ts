@@ -33,6 +33,14 @@ export class HabitGroupController {
     let message = 'Successfully fetched all habit groups';
     return { message, data: habitGroups };
   }
+  @Get('created')
+  @UseGuards(JWTGuard)
+  async findCreatedGroups(@Req() req: Request): HabitsGroupResponse {
+    const { id } = req.user as { id: string };
+    const habitGroups = await this.habitGroupService.findCreatedGroups(id);
+    let message = 'Successfully fetched all habit groups';
+    return { message, data: habitGroups };
+  }
   @Get()
   async findAll(): HabitsGroupResponse {
     const habitGroups = await this.habitGroupService.findAll();

@@ -79,6 +79,16 @@ export class HabitGroupService {
     });
     return groupMembers.map(({ group }) => group);
   }
+  async findCreatedGroups(userId: string) {
+    const habitGroups = await this.db.query.habitGroup.findMany({
+      where: (table, { eq }) => eq(table.creatorId, +userId),
+      with: {
+        habit: true,
+        members: true,
+      },
+    });
+    return habitGroups;
+  }
   async findOne(userId: string, groupId: string) {
     try {
       const habitGroup = (await this.db.query.habitGroup.findFirst({

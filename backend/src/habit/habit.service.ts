@@ -41,7 +41,6 @@ export class HabitService {
       });
     }
   }
-
   async findOne(id: number) {
     try {
       const habit = await this.db.query.habit.findFirst({
