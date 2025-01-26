@@ -25,12 +25,12 @@ type HabitsGroupResponse = Promise<ServerResponse<HabitGroupEntity[]>>;
 export class HabitGroupController {
   constructor(private readonly habitGroupService: HabitGroupService) {}
 
-  @Get('user')
+  @Get('joined')
   @UseGuards(JWTGuard)
   async findUserGroups(@Req() req: Request): HabitsGroupResponse {
     const { id } = req.user as { id: string };
     const habitGroups = await this.habitGroupService.findUserGroups(id);
-    let message = 'Successfully fetched all habit groups';
+    let message = 'Successfully fetched all groups you are part of';
     return { message, data: habitGroups };
   }
   @Get('created')
