@@ -76,7 +76,6 @@ export class HabitGroupController {
     return { message, data: createdGroup };
   }
 
-  @Put(':id')
   @Put('/join-group/:id')
   @UseGuards(JWTGuard)
   async update(
