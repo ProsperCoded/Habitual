@@ -80,7 +80,10 @@ export class HabitService {
         .set(updateHabitDto)
         .where(and(eq(habit.id, habitId), eq(habit.creatorId, userId)))
         .returning();
-      if (!updatedHabit.length) throw new NotFoundException('Habit not found');
+      if (!updatedHabit.length)
+        throw new NotFoundException(
+          'Habit not found or You are not the creator',
+        );
       return updatedHabit[0];
     } catch (error) {
       console.error(error);

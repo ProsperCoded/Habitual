@@ -42,7 +42,7 @@ export class HabitController {
     };
   }
 
-  @Get('mine')
+  @Get('created')
   @UseGuards(JWTGuard)
   async findMine(@Req() req: Request): HabitsResponse {
     const { id } = req.user as { id: string };
