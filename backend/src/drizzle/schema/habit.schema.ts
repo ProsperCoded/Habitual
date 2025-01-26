@@ -2,6 +2,7 @@ import { index, pgTable, primaryKey, serial, text } from 'drizzle-orm/pg-core';
 import { user } from './users.schema';
 import { relations } from 'drizzle-orm';
 import { integer } from 'drizzle-orm/pg-core';
+import { habitGroup } from 'src/drizzle/schema/habitGroup.schema';
 
 // export const HabitState = pgEnum('habitState', ['private', 'public']);
 export const habit = pgTable('habits', {
@@ -37,6 +38,7 @@ export const habitActiveUsers = pgTable(
 // Define relations
 export const habitsRelations = relations(habit, ({ many, one }) => ({
   activeUsers: many(habitActiveUsers),
+  groups: many(habitGroup),
   creator: one(user, {
     fields: [habit.creatorId],
     references: [user.id],

@@ -24,9 +24,11 @@ export class HabitService {
   async findAll() {
     try {
       const habits = await this.db.query.habit.findMany({
-        // where: (habits, { eq }) => eq(habits.habitState, 'public'),
         with: {
           creator: true,
+          groups: {
+            where: (g, { eq }) => eq(g.groupState, 'public'),
+          },
         },
       });
       return habits;
@@ -46,6 +48,9 @@ export class HabitService {
         where: (habits, { eq }) => eq(habits.id, id),
         with: {
           creator: true,
+          groups: {
+            where: (g, { eq }) => eq(g.groupState, 'public'),
+          },
         },
       });
       if (!habit) throw new NotFoundException('Habit not found');
@@ -65,6 +70,9 @@ export class HabitService {
       where: (habits, { eq }) => eq(habits.creatorId, userId),
       with: {
         creator: true,
+        groups: {
+          where: (g, { eq }) => eq(g.groupState, 'public'),
+        },
       },
     });
   }
