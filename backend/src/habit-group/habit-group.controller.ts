@@ -76,7 +76,7 @@ export class HabitGroupController {
     return { message, data: createdGroup };
   }
 
-  @Put('/join-group/:id')
+  @Put('/update/:id')
   @UseGuards(JWTGuard)
   async update(
     @Req() req: Request,
@@ -87,6 +87,7 @@ export class HabitGroupController {
     const updated = await this.habitGroupService.update(userId, groupId, dto);
     return { message: 'Successfully updated habit group', data: updated };
   }
+  @Put('/join-group/:id')
   @UseGuards(JWTGuard)
   async joinGroup(
     @Req() req: Request,
