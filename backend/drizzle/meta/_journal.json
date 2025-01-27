@@ -5,85 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1735310928092,
-      "tag": "0000_fancy_inertia",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1735313810558,
-      "tag": "0001_thick_puma",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1735669398228,
-      "tag": "0002_zippy_sue_storm",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1736269292802,
-      "tag": "0003_messy_anthem",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1736271749055,
-      "tag": "0004_violet_stranger",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1736322412766,
-      "tag": "0005_chilly_mister_fear",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1737402833442,
-      "tag": "0006_eager_jack_power",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1737483332770,
-      "tag": "0007_married_old_lace",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1737541656786,
-      "tag": "0008_smooth_fat_cobra",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1737542763200,
-      "tag": "0009_curly_silver_samurai",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1737551627790,
-      "tag": "0010_uneven_ultragirl",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1737555507210,
-      "tag": "0011_clammy_moonstone",
+      "when": 1737978152138,
+      "tag": "0000_puzzling_king_cobra",
       "breakpoints": true
     }
   ]
