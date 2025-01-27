@@ -9,7 +9,7 @@ let SERVER_IS_READY = false;
 export class DrizzleService {
   constructor(@Inject(DRIZZLE_SYMBOL) private db: DrizzleDB) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async keepAlive() {
     try {
       await this.db.execute(sql`SELECT 1;`);
