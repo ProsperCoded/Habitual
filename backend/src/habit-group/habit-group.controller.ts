@@ -29,7 +29,7 @@ export class HabitGroupController {
   @UseGuards(JWTGuard)
   async findUserGroups(@Req() req: Request): HabitsGroupResponse {
     const { id } = req.user as { id: string };
-    const habitGroups = await this.habitGroupService.findUserGroups(id);
+    const habitGroups = await this.habitGroupService.findJoinedGroups(id);
     let message = 'Successfully fetched all groups you are part of';
     return { message, data: habitGroups };
   }
