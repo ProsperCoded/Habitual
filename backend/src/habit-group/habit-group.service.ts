@@ -72,7 +72,11 @@ export class HabitGroupService {
       with: {
         group: {
           with: {
-            members: true,
+            members: {
+              with: {
+                user: true,
+              },
+            },
             creator: true,
             habit: true,
           },
@@ -86,7 +90,11 @@ export class HabitGroupService {
       where: (table, { eq }) => eq(table.creatorId, +userId),
       with: {
         habit: true,
-        members: true,
+        members: {
+          with: {
+            user: true,
+          },
+        },
         creator: true,
       },
     });
@@ -139,7 +147,11 @@ export class HabitGroupService {
         with: {
           creator: true,
           habit: true,
-          members: true,
+          members: {
+            with: {
+              user: true,
+            },
+          },
         },
       });
       return habitGroups;
