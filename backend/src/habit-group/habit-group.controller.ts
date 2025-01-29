@@ -120,7 +120,23 @@ export class HabitGroupController {
     let message = 'Successfully deleted habit group';
     return { message, data: null };
   }
-
+  // Get backdated logs default to 7 intervals ago
+  @Get('/backdated-logs/:groupId/:intervalAgo')
+  @UseGuards(JWTGuard)
+  async getBackdatedLogs(
+    @Req() req: Request,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('intervalAgo', ParseIntPipe) intervalAgo: number,
+  ): Promise<ServerResponse<ExecutionLogsEntity>> {
+    const { id: userId } = req.user as { id: string };
+    const backdatedLogs = await this.habitGroupService.getBackdatedLog(
+      +userId,
+      +groupId,
+      intervalAgo,
+    );
+    let message = 'Successfully fetched backdated logs';
+    return { message, data: backdatedLogs };
+  }
   @Get('/executed-logs/user/:id')
   @UseGuards(JWTGuard)
   async getExecutedHabits(

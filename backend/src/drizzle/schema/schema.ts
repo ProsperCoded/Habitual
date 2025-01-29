@@ -3,3 +3,4 @@ export * from './groupMembers.schema';
 export * from './habitGroup.schema';
 export * from './users.schema';
 export * from './executionLogs.schema';
+export * from './streak.schema';

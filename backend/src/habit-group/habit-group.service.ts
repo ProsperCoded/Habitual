@@ -12,10 +12,14 @@ import { DrizzleDB, ExecutionLogsEntity } from 'src/lib/types';
 import { habitGroup } from 'src/drizzle/schema/habitGroup.schema';
 import { ServerResponse } from 'src/lib/types';
 import { groupMember } from 'src/drizzle/schema/groupMembers.schema';
-import { and, eq, InferSelectModel } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
 import * as moment from 'moment';
 import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { calcStreak, getIntervalDays, parseInterval } from 'src/lib/utils';
+import { streak } from 'src/drizzle/schema/streak.schema';
+import { user } from 'src/drizzle/schema/users.schema';
 @Injectable()
 export class HabitGroupService {
   constructor(
@@ -288,14 +292,11 @@ export class HabitGroupService {
     const diff = startDate.diff(currentDate, 'days');
     console.log('Days since start date:', diff);
 
-    const interval = this.parseInterval(group.interval);
+    const interval = parseInterval(group.interval);
     console.log('Interval:', interval);
 
     // * convert the interval to days
-    const intervalInDays = this.getIntervalDays(
-      interval.value,
-      interval.quantity,
-    );
+    const intervalInDays = getIntervalDays(interval.value, interval.quantity);
     console.log('Interval in days:', intervalInDays);
 
     // * Determines if the habit is scheduled for today based on the interval.
@@ -331,19 +332,6 @@ export class HabitGroupService {
     }
   }
 
-  private parseInterval(interval: string) {
-    const valueRegex = RegExp('^[0-9]+');
-    const quantityRegex = RegExp('(days?)|(weeks?)|(months?)|(years?)$');
-    return {
-      value: interval.match(valueRegex)[0],
-      quantity: interval.match(quantityRegex)[0],
-    };
-  }
-
-  private getIntervalDays(value: string, quantity: string): number {
-    return moment.duration({ [quantity]: value }).asDays();
-  }
-
   // ? Ensures user can't execute within interval after previously executing a habit
   private async checkPreviousExecutions(
     userId: string,
@@ -370,14 +358,11 @@ export class HabitGroupService {
     console.log('Last Date Executed:', lastDateExecuted.format());
 
     // *Ensuring user can't execute within interval after previously executing a habit
-    const interval = this.parseInterval(group.interval);
+    const interval = parseInterval(group.interval);
     console.log('Interval:', interval);
 
     // * convert the interval to days
-    const intervalInDays = this.getIntervalDays(
-      interval.value,
-      interval.quantity,
-    );
+    const intervalInDays = getIntervalDays(interval.value, interval.quantity);
     console.log('Interval in Days:', intervalInDays);
     const dateToNextExecute = moment(lastDateExecuted).add(
       intervalInDays,
@@ -439,5 +424,97 @@ export class HabitGroupService {
       },
     });
     return executionLogs;
+  }
+
+  async getBackdatedLog(userId: number, groupId: number, intervalAgo: number) {
+    const group = await this.db.query.habitGroup.findFirst({
+      where: (table, { eq }) => eq(table.id, +groupId),
+    });
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    const interval = parseInterval(group.interval);
+
+    // * convert the interval to days
+    const intervalInDays = getIntervalDays(interval.value, interval.quantity);
+    console.log('Interval in days:', intervalInDays);
+
+    const backDate = moment().subtract(intervalInDays * intervalAgo, 'days');
+    console.log('Backdate:', backDate.format());
+
+    const executionLogs = await this.db.query.executionLogs.findMany({
+      where: (table, { and, eq, gte }) =>
+        and(
+          eq(table.userId, userId),
+          eq(table.groupId, groupId),
+          gte(table.completionTime, backDate.toDate()),
+        ),
+      with: {
+        user: true,
+      },
+    });
+    return executionLogs;
+  }
+
+  // STREAKS
+  // Cache the streaks for every user and every group daily.
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async cacheStreaks() {
+    const groups = await this.db.query.habitGroup.findMany({
+      with: {
+        members: true,
+      },
+    });
+    for (let group of groups) {
+      for (let member of group.members) {
+        this.db.query.executionLogs
+          .findMany({
+            where: (table, { and, eq }) =>
+              and(eq(table.userId, member.userId), eq(table.groupId, group.id)),
+            orderBy: (table, { desc }) => desc(table.completionTime),
+          })
+          .then(async (logs) => {
+            let interval = parseInterval(group.interval);
+
+            const streakNo = calcStreak(
+              logs,
+              getIntervalDays(interval.value, interval.quantity),
+              group.tolerance,
+            );
+            let previousStrick = await this.db.query.streak.findFirst({
+              where: (table, { and, eq }) =>
+                and(
+                  eq(table.userId, member.userId),
+                  eq(table.groupId, group.id),
+                ),
+            });
+            if (!previousStrick) {
+              this.db.insert(streak).values([
+                {
+                  userId: member.userId,
+                  groupId: group.id,
+                  currentStreak: streakNo,
+                  longestStreak: streakNo,
+                  lastChecked: new Date().toISOString(),
+                },
+              ]);
+            } else {
+              this.db
+                .update(streak)
+                .set({
+                  currentStreak: streakNo,
+                  longestStreak:
+                    streakNo > previousStrick.longestStreak
+                      ? streakNo
+                      : previousStrick.longestStreak,
+                  lastChecked: new Date().toISOString(),
+                })
+                .where(
+                  and(eq(user.id, member.userId), eq(habitGroup.id, group.id)),
+                );
+            }
+          });
+      }
+    }
   }
 }

@@ -28,6 +28,7 @@ export class CreateHabitGroupDto {
   habitId: number;
 
   @IsNotEmpty()
+  // YYYY-MM-DD
   @IsDateString()
   startDate: string;
 

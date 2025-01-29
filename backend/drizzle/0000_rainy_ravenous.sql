@@ -47,6 +47,15 @@ CREATE TABLE "executionLogs" (
 	"completionTime" timestamp NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "streaks" (
+	"groupId" integer NOT NULL,
+	"userId" integer NOT NULL,
+	"currentStreak" integer NOT NULL,
+	"longestStreak" integer NOT NULL,
+	"lastChecked" date NOT NULL,
+	CONSTRAINT "streak_pk" PRIMARY KEY("groupId","userId")
+);
+--> statement-breakpoint
 ALTER TABLE "habits" ADD CONSTRAINT "habits_creatorId_users_id_fk" FOREIGN KEY ("creatorId") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "habitActiveUsers" ADD CONSTRAINT "habitActiveUsers_habitId_habits_id_fk" FOREIGN KEY ("habitId") REFERENCES "public"."habits"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "habitActiveUsers" ADD CONSTRAINT "habitActiveUsers_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -56,5 +65,7 @@ ALTER TABLE "habitGroup" ADD CONSTRAINT "habitGroup_habitId_habits_id_fk" FOREIG
 ALTER TABLE "habitGroup" ADD CONSTRAINT "habitGroup_creatorId_users_id_fk" FOREIGN KEY ("creatorId") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "executionLogs" ADD CONSTRAINT "executionLogs_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "executionLogs" ADD CONSTRAINT "executionLogs_groupId_habitGroup_id_fk" FOREIGN KEY ("groupId") REFERENCES "public"."habitGroup"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "streaks" ADD CONSTRAINT "streaks_groupId_habitGroup_id_fk" FOREIGN KEY ("groupId") REFERENCES "public"."habitGroup"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "streaks" ADD CONSTRAINT "streaks_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "userIdIndex" ON "habitActiveUsers" USING btree ("userId");--> statement-breakpoint
 CREATE INDEX "executionLogs_user_group_idx" ON "executionLogs" USING btree ("userId","groupId");

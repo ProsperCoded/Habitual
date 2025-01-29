@@ -47,7 +47,7 @@ export class HabitController {
   async findMine(@Req() req: Request): HabitsResponse {
     const { id } = req.user as { id: string };
     return {
-      data: await this.habitService.findMine(+id),
+      data: await this.habitService.findCreated(+id),
       message: 'Successfully Fetched Your Habits',
     };
   }
