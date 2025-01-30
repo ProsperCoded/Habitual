@@ -10,6 +10,7 @@ import {
   Put,
   ParseIntPipe,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { HabitGroupService } from './habit-group.service';
 import { CreateHabitGroupDto } from './dto/create-habit-group.dto';
@@ -80,11 +81,11 @@ export class HabitGroupController {
     return { message, data: createdGroup };
   }
 
-  @Put('/update/:id')
+  @Put('/:groupId')
   @UseGuards(JWTGuard)
   async update(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) groupId: string,
+    @Param('groupId', ParseIntPipe) groupId: string,
     @Body() dto: UpdateHabitGroupDto,
   ): HabitGroupResponse {
     const userId = (req.user as { id: string }).id;
@@ -155,11 +156,11 @@ export class HabitGroupController {
     let message = 'Successfully fetched executed habits';
     return { message, data: executedHabits };
   }
-  @Get('/executed-logs/:id')
+  @Get('/executed-logs/:groupId')
   @UseGuards(JWTGuard)
   async getAllExecuted(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) groupId: string,
+    @Param('groupId', ParseIntPipe) groupId: string,
   ): Promise<ServerResponse<ExecutionLogsEntity>> {
     const { id: userId } = req.user as { id: string };
     const allExecutedHabits = await this.habitGroupService.getAllExecuted(
@@ -169,7 +170,26 @@ export class HabitGroupController {
     let message = 'Successfully fetched executed habits';
     return { message, data: allExecutedHabits };
   }
-  @Post('execute-habit/:id')
+
+  @Get('/executed-paginated-logs/:groupId')
+  @UseGuards(JWTGuard)
+  async paginatedLogs(
+    @Req() req: Request,
+    @Param('groupId', ParseIntPipe) groupId: string,
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
+  ): Promise<ServerResponse<ExecutionLogsEntity>> {
+    const { id: userId } = req.user as { id: string };
+    const executedHabits = await this.habitGroupService.paginatedLogs(
+      userId,
+      groupId,
+      page,
+      limit,
+    );
+    let message = 'Successfully fetched executed habits';
+    return { message, data: executedHabits };
+  }
+  @Post('execute/:id')
   @UseGuards(JWTGuard)
   async executeHabit(
     @Req() req: Request,
