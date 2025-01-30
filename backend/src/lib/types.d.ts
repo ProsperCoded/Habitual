@@ -1,6 +1,7 @@
 import * as schema from '../drizzle/schema/schema';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { executionLogs } from '../drizzle/schema/schema';
+import { streak } from '../drizzle/schema/schema';
 
 export type DrizzleDB = NodePgDatabase<typeof schema>;
 
@@ -15,3 +16,4 @@ export type ServerResponse<T> = {
   error?: string | null;
 };
 export type ExecutionLogsEntity = InferSelectModel<typeof executionLogs>;
+export type StreakEntity = InferSelectModel<typeof streak>;

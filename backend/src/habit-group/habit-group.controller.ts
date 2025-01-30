@@ -15,7 +15,11 @@ import { HabitGroupService } from './habit-group.service';
 import { CreateHabitGroupDto } from './dto/create-habit-group.dto';
 import { JWTGuard } from 'src/auth/jwt.guard';
 import { Request } from 'express';
-import { ExecutionLogsEntity, ServerResponse } from 'src/lib/types';
+import {
+  ExecutionLogsEntity,
+  ServerResponse,
+  StreakEntity,
+} from 'src/lib/types';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
 import { UpdateHabitGroupDto } from 'src/habit-group/dto/update-habit-group.dto';
 
@@ -178,5 +182,17 @@ export class HabitGroupController {
     );
     let message = 'Successfully executed habit';
     return { message, data: executionLog };
+  }
+
+  @Get('/streaks/:groupId')
+  @UseGuards(JWTGuard)
+  async getStreak(
+    @Req() req: Request,
+    @Param('groupId', ParseIntPipe) groupId: number,
+  ): Promise<ServerResponse<StreakEntity[]>> {
+    // const { id: userId } = req.user as { id: string };
+    const streak = await this.habitGroupService.groupStreak(+groupId);
+    let message = 'Successfully fetched streak';
+    return { message, data: streak };
   }
 }

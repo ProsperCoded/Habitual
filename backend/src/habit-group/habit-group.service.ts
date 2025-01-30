@@ -455,7 +455,19 @@ export class HabitGroupService {
     });
     return executionLogs;
   }
-
+  async groupStreak(groupId: number) {
+    const streak = await this.db.query.streak.findMany({
+      where: (table, { eq }) => eq(table.groupId, groupId),
+    });
+    return streak;
+  }
+  async userStreak(userId: number, groupId: number) {
+    const streak = await this.db.query.streak.findFirst({
+      where: (table, { and, eq }) =>
+        and(eq(table.userId, userId), eq(table.groupId, groupId)),
+    });
+    return streak;
+  }
   // STREAKS
   // Cache the streaks for every user and every group daily.
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
