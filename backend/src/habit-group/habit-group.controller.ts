@@ -171,7 +171,7 @@ export class HabitGroupController {
     return { message, data: allExecutedHabits };
   }
 
-  @Get('/executed-paginated-logs/:groupId')
+  @Get('/paginated-logs/:groupId')
   @UseGuards(JWTGuard)
   async paginatedLogs(
     @Req() req: Request,
