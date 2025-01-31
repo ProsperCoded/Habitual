@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import config from 'src/config/config';
 import { ServerResponse, UserPayload } from 'src/lib/types';
-import { Request, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import { UserService } from 'src/user/user.service';
 import { ConfigType } from '@nestjs/config';
 import * as moment from 'moment';
@@ -42,12 +42,16 @@ export class AuthController {
     console.log({ user });
     const today = moment();
     const expiry = today.add(7, 'days');
-    res.cookie('Authorization', user.token, {
+    const cookieOptions: CookieOptions = {
       httpOnly: true,
       expires: expiry.toDate(),
-      secure: true,
       sameSite: 'none',
-    });
+      secure: false,
+    };
+    if (this.configService.isProduction === true) {
+      cookieOptions['secure'] = true;
+    }
+    res.cookie('Authorization', user.token, cookieOptions);
     const FRONTEND_URL = this.configService.frontEndUrl;
     const url = new URL(`auth/${user.id.toString()}`, FRONTEND_URL);
     // url.searchParams.append('id', user.id.toString());
