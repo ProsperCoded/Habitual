@@ -16,7 +16,7 @@ export class AuthService {
     private jwtConfigurations: ConfigType<typeof jwtConfig>,
   ) {}
   logout(res: Response) {
-    res.cookie('Authorization', '', { httpOnly: true });
+    res.cookie('Authorization', '', { httpOnly: true, expires: new Date(0) });
   }
   // Signup the user
   private async login(user: CreateUserDto): Promise<UserPayload> {
