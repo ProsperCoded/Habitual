@@ -14,10 +14,11 @@ import { ServerResponse } from 'src/lib/types';
 import { groupMember } from 'src/drizzle/schema/groupMembers.schema';
 import { and, eq } from 'drizzle-orm';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
+// import * as moment from 'moment';
 import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { calcStreak, getIntervalDays, parseInterval } from 'src/lib/utils';
+import { calcStreak, parseInterval } from 'src/lib/utils';
 import { streak } from 'src/drizzle/schema/streak.schema';
 import { user } from 'src/drizzle/schema/users.schema';
 @Injectable()
@@ -267,7 +268,7 @@ export class HabitGroupService {
    * 6. If the current time is within the allowed window, logs the habit execution in the database.
    */
   async shouldExecute(userId: string, group: HabitGroupEntity) {
-    const currentDate = moment();
+    const currentDate = moment().utcOffset('+01:00');
     console.log('Current Time:', currentDate.format());
 
     const shouldExecuteHabit = await this.checkPreviousExecutions(
@@ -292,11 +293,8 @@ export class HabitGroupService {
     const diff = startDate.diff(currentDate, 'days');
     console.log('Days since start date:', diff);
 
-    const interval = parseInterval(group.interval);
-    console.log('Interval:', interval);
-
     // * convert the interval to days
-    const intervalInDays = getIntervalDays(interval.value, interval.quantity);
+    const intervalInDays = parseInterval(group.interval);
     console.log('Interval in days:', intervalInDays);
 
     // * Determines if the habit is scheduled for today based on the interval.
@@ -358,11 +356,9 @@ export class HabitGroupService {
     console.log('Last Date Executed:', lastDateExecuted.format());
 
     // *Ensuring user can't execute within interval after previously executing a habit
-    const interval = parseInterval(group.interval);
-    console.log('Interval:', interval);
 
     // * convert the interval to days
-    const intervalInDays = getIntervalDays(interval.value, interval.quantity);
+    const intervalInDays = parseInterval(group.interval);
     console.log('Interval in Days:', intervalInDays);
     const dateToNextExecute = moment(lastDateExecuted).add(
       intervalInDays,
@@ -450,10 +446,9 @@ export class HabitGroupService {
     if (!group) {
       throw new NotFoundException('Group not found');
     }
-    const interval = parseInterval(group.interval);
 
     // * convert the interval to days
-    const intervalInDays = getIntervalDays(interval.value, interval.quantity);
+    const intervalInDays = parseInterval(group.interval);
     console.log('Interval in days:', intervalInDays);
 
     const backDate = moment().subtract(intervalInDays * intervalAgo, 'days');
@@ -503,11 +498,9 @@ export class HabitGroupService {
             orderBy: (table, { desc }) => desc(table.completionTime),
           })
           .then(async (logs) => {
-            let interval = parseInterval(group.interval);
-
             const streakNo = calcStreak(
               logs,
-              getIntervalDays(interval.value, interval.quantity),
+              parseInterval(group.interval),
               group.tolerance,
             );
             let previousStrick = await this.db.query.streak.findFirst({

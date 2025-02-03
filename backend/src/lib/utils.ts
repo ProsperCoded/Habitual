@@ -29,12 +29,9 @@ export function calcStreak(
 export function parseInterval(interval: string) {
   const valueRegex = RegExp('^[0-9]+');
   const quantityRegex = RegExp('(days?)|(weeks?)|(months?)|(years?)$');
-  return {
+  const data = {
     value: interval.match(valueRegex)[0],
     quantity: interval.match(quantityRegex)[0],
   };
-}
-
-export function getIntervalDays(value: string, quantity: string): number {
-  return moment.duration({ [quantity]: value }).asDays();
+  return moment.duration({ [data.quantity]: data.value }).asDays();
 }
