@@ -480,7 +480,7 @@ export class HabitGroupService {
     });
     return streak;
   }
-  // STREAKS
+  // STREAKS //
   // Cache the streaks for every user and every group daily.
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cacheStreaks() {
