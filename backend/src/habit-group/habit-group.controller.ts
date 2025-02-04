@@ -203,10 +203,21 @@ export class HabitGroupController {
     let message = 'Successfully executed habit';
     return { message, data: executionLog };
   }
+  @Get('/streaks/:groupId')
+  @UseGuards(JWTGuard)
+  async getUserStreak(
+    @Req() req: Request,
+    @Param('groupId', ParseIntPipe) groupId: number,
+  ): Promise<ServerResponse<StreakEntity>> {
+    const { id: userId } = req.user as { id: string };
+    const streak = await this.habitGroupService.userStreak(+userId, groupId);
+    let message = 'Successfully fetched streak';
+    return { message, data: streak };
+  }
 
   @Get('/streaks/:groupId')
   @UseGuards(JWTGuard)
-  async getStreak(
+  async getGroupStreak(
     @Req() req: Request,
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<ServerResponse<StreakEntity[]>> {
