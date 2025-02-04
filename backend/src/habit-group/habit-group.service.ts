@@ -228,16 +228,16 @@ export class HabitGroupService {
   }
   async deleteGroup(userId: string, groupId: string) {
     try {
+      // * Cascade by deleting group members first
+      await this.db
+        .delete(groupMember)
+        .where(eq(groupMember.groupId, +groupId));
+
       const response = await this.db
         .delete(habitGroup)
         .where(
           and(eq(habitGroup.id, +groupId), eq(habitGroup.creatorId, +userId)),
         );
-
-      // * Delete all members of this group
-      await this.db
-        .delete(groupMember)
-        .where(eq(groupMember.groupId, +groupId));
       return response;
     } catch (error) {
       console.error(error);
