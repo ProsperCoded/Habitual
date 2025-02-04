@@ -203,7 +203,7 @@ export class HabitGroupController {
     let message = 'Successfully executed habit';
     return { message, data: executionLog };
   }
-  @Get('/streaks/:groupId')
+  @Get('/user-streak/:groupId')
   @UseGuards(JWTGuard)
   async getUserStreak(
     @Req() req: Request,
