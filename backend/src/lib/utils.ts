@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 export function calcStreak(
   logs: {
     id: number;
@@ -37,7 +37,7 @@ export function parseInterval(interval: string) {
 }
 
 export function getCurrentMoment() {
-  return moment().utcOffset('+01:00');
+  return moment().tz('Africa/Lagos');
 }
 export function getCurrentDate() {
   return getCurrentMoment().toDate();

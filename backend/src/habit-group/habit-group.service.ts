@@ -14,7 +14,7 @@ import { ServerResponse } from 'src/lib/types';
 import { groupMember } from 'src/drizzle/schema/groupMembers.schema';
 import { and, eq } from 'drizzle-orm';
 import { HabitGroupEntity } from 'src/habit-group/entities/habit-group.entity';
-import * as moment from 'moment-timezone';
+import * as moment from 'moment';
 // import * as moment from 'moment';
 import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
