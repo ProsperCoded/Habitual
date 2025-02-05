@@ -35,3 +35,10 @@ export function parseInterval(interval: string) {
   };
   return moment.duration({ [data.quantity]: data.value }).asDays();
 }
+
+export function getCurrentMoment() {
+  return moment().utcOffset('+01:00');
+}
+export function getCurrentDate() {
+  return getCurrentMoment().toDate();
+}

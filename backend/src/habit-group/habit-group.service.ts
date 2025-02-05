@@ -18,7 +18,12 @@ import * as moment from 'moment-timezone';
 // import * as moment from 'moment';
 import { executionLogs } from 'src/drizzle/schema/executionLogs.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { calcStreak, parseInterval } from 'src/lib/utils';
+import {
+  calcStreak,
+  getCurrentDate,
+  getCurrentMoment,
+  parseInterval,
+} from 'src/lib/utils';
 import { streak } from 'src/drizzle/schema/streak.schema';
 import { user } from 'src/drizzle/schema/users.schema';
 @Injectable()
@@ -268,7 +273,7 @@ export class HabitGroupService {
    * 6. If the current time is within the allowed window, logs the habit execution in the database.
    */
   async shouldExecute(userId: string, group: HabitGroupEntity) {
-    const currentDate = moment().utcOffset('+01:00');
+    const currentDate = getCurrentMoment();
     console.log('Current Time:', currentDate.format());
 
     const shouldExecuteHabit = await this.checkPreviousExecutions(
@@ -393,11 +398,36 @@ export class HabitGroupService {
             {
               userId: +userId,
               groupId: +group.id,
-              completionTime: new Date(),
+              completionTime: getCurrentDate(),
             },
           ])
           .returning()
       )[0];
+      // Update streak  for user(create if it doesn't exists)
+      const previousStreak = await this.db.query.streak.findFirst({
+        where: (table, { and, eq }) =>
+          and(eq(table.userId, +userId), eq(table.groupId, +group.id)),
+      });
+      if (!previousStreak) {
+        await this.db.insert(streak).values([
+          {
+            userId: +userId,
+            groupId: +group.id,
+            currentStreak: 1,
+            longestStreak: 1,
+            lastChecked: getCurrentDate().toISOString(),
+          },
+        ]);
+      } else {
+        await this.db.update(streak).set({
+          currentStreak: previousStreak.currentStreak + 1,
+          longestStreak:
+            previousStreak.currentStreak + 1 > previousStreak.longestStreak
+              ? previousStreak.currentStreak + 1
+              : previousStreak.longestStreak,
+          lastChecked: getCurrentDate().toISOString(),
+        });
+      }
       console.log('Execution Log:', executionLog);
       return executionLog;
     }
@@ -484,6 +514,7 @@ export class HabitGroupService {
   // Cache the streaks for every user and every group daily.
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cacheStreaks() {
+    const currentDate = getCurrentDate();
     const groups = await this.db.query.habitGroup.findMany({
       with: {
         members: true,
@@ -517,7 +548,7 @@ export class HabitGroupService {
                   groupId: group.id,
                   currentStreak: streakNo,
                   longestStreak: streakNo,
-                  lastChecked: new Date().toISOString(),
+                  lastChecked: currentDate.toISOString(),
                 },
               ]);
             } else {
@@ -529,7 +560,7 @@ export class HabitGroupService {
                     streakNo > previousStrick.longestStreak
                       ? streakNo
                       : previousStrick.longestStreak,
-                  lastChecked: new Date().toISOString(),
+                  lastChecked: currentDate.toISOString(),
                 })
                 .where(
                   and(eq(user.id, member.userId), eq(habitGroup.id, group.id)),
@@ -538,5 +569,9 @@ export class HabitGroupService {
           });
       }
     }
+    console.log(
+      "Executed streaks' cache, for all users and groups " +
+        currentDate.toISOString(),
+    );
   }
 }
