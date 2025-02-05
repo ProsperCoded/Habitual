@@ -19,9 +19,7 @@ export const executionLogs = pgTable(
     groupId: integer('groupId')
       .notNull()
       .references(() => habitGroup.id, { onDelete: 'cascade' }),
-    // habitId: integer('habitId')
-    //   .notNull()
-    //   .references(() => habit.id, { onDelete: 'cascade' }),
+
     completionTime: timestamp('completionTime').notNull(), // Logs the exact time
   },
   (table) => {

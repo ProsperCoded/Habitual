@@ -7,10 +7,10 @@ export const groupMember = pgTable(
   {
     userId: integer('userId')
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: 'cascade' }),
     groupId: integer('groupId')
       .notNull()
-      .references(() => habitGroup.id),
+      .references(() => habitGroup.id, { onDelete: 'cascade' }),
   },
   (table) => ({
     pk: primaryKey({
