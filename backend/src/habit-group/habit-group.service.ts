@@ -34,6 +34,11 @@ export class HabitGroupService {
   ) {}
   async create(userId: string, createHabitGroupDto: CreateHabitGroupDto) {
     try {
+      // Validate timezone
+      if (!moment.tz.zone(createHabitGroupDto.timezone)) {
+        throw new BadRequestException('Invalid timezone');
+      }
+
       const createdGroups = await this.db
         .insert(habitGroup)
         .values([{ ...createHabitGroupDto, creatorId: +userId }])
@@ -56,6 +61,11 @@ export class HabitGroupService {
   }
   async update(userId: string, groupId: string, dto: UpdateHabitGroupDto) {
     try {
+      // Validate timezone if it's being updated
+      if (dto.timezone && !moment.tz.zone(dto.timezone)) {
+        throw new BadRequestException('Invalid timezone');
+      }
+
       const response = await this.db
         .update(habitGroup)
         .set(dto)
@@ -125,6 +135,7 @@ export class HabitGroupService {
         },
       })) as HabitGroupEntity;
       try {
+        let timezone = habitGroup.timezone;
         const shouldExecute = await this.shouldExecute(userId, habitGroup);
         habitGroup.execute = {
           shouldExecute,
@@ -274,7 +285,7 @@ export class HabitGroupService {
    * 6. If the current time is within the allowed window, logs the habit execution in the database.
    */
   async shouldExecute(userId: string, group: HabitGroupEntity) {
-    const currentDate = getCurrentMoment();
+    const currentDate = getCurrentMoment(group.timezone);
     console.log('Current Time:', currentDate.format());
 
     const shouldExecuteHabit = await this.checkPreviousExecutions(
@@ -288,7 +299,7 @@ export class HabitGroupService {
       });
     }
 
-    const startDate = moment(group.startDate, 'YYYY-MM-DD');
+    const startDate = moment.tz(group.startDate, 'YYYY-MM-DD', group.timezone);
 
     if (startDate.isAfter(currentDate)) {
       throw new BadRequestException({
@@ -308,16 +319,19 @@ export class HabitGroupService {
     console.log('Habit is scheduled for today:', habitIsToday);
 
     if (habitIsToday) {
-      const executionTime = moment(group.executionTime, 'HH:mm:ss');
-      const executionDate = moment().set({
+      const executionTime = moment.tz(
+        group.executionTime,
+        'HH:mm:ss',
+        group.timezone,
+      );
+      const executionDate = getCurrentMoment(group.timezone).set({
         hour: executionTime.hour(),
         minute: executionTime.minute(),
         second: executionTime.second(),
       });
-      const maxTolerance = moment(executionDate).add(
-        group.tolerance,
-        'seconds',
-      );
+      const maxTolerance = moment
+        .tz(executionDate, group.timezone)
+        .add(group.tolerance, 'seconds');
       console.log('Execution Date:', executionDate.format());
       console.log('Current Time:', currentDate.format());
       console.log('Max Tolerance:', maxTolerance.format());
@@ -341,17 +355,24 @@ export class HabitGroupService {
     userId: string,
     group: HabitGroupEntity,
   ) {
-    const lastExecution = (
+    const lastExecution: ExecutionLogsEntity = (
       await this.db.query.executionLogs.findMany({
         where: (table, { and, eq }) =>
           and(eq(table.userId, +userId), eq(table.groupId, +group.id)),
         orderBy: (table, { desc }) => desc(table.completionTime),
       })
-    )[0] as ExecutionLogsEntity;
+    )[0];
     console.log('Last Execution:', lastExecution);
     if (!lastExecution) return true;
-    const lastDateExecuted = moment(lastExecution.completionTime);
-    const executionTime = moment(group.executionTime, 'HH:mm:ss');
+    const lastDateExecuted = moment.tz(
+      lastExecution.completionTime as Date,
+      group.timezone,
+    );
+    const executionTime = moment(
+      group.executionTime,
+      'HH:mm:ss',
+      group.timezone,
+    );
 
     // * removing the extra time from the last execution
     lastDateExecuted.set({
@@ -371,7 +392,7 @@ export class HabitGroupService {
       'days',
     );
     console.log('Date to Next Execute:', dateToNextExecute.format());
-    const today = moment();
+    const today = getCurrentMoment(group.timezone);
     console.log('Today:', today.format());
 
     if (dateToNextExecute.isAfter(today)) {
@@ -399,7 +420,8 @@ export class HabitGroupService {
             {
               userId: +userId,
               groupId: +group.id,
-              completionTime: getCurrentDate(),
+              // Store in UTC
+              completionTime: moment.tz(group.timezone).utc().toDate(),
             },
           ])
           .returning()
@@ -416,7 +438,7 @@ export class HabitGroupService {
             groupId: +group.id,
             currentStreak: 1,
             longestStreak: 1,
-            lastChecked: getCurrentDate().toISOString(),
+            lastChecked: getCurrentDate(group.timezone),
           },
         ]);
       } else {
@@ -426,7 +448,7 @@ export class HabitGroupService {
             previousStreak.currentStreak + 1 > previousStreak.longestStreak
               ? previousStreak.currentStreak + 1
               : previousStreak.longestStreak,
-          lastChecked: getCurrentDate().toISOString(),
+          lastChecked: getCurrentDate(group.timezone),
         });
       }
       console.log('Execution Log:', executionLog);
@@ -482,8 +504,11 @@ export class HabitGroupService {
     const intervalInDays = parseInterval(group.interval);
     console.log('Interval in days:', intervalInDays);
 
-    const backDate = moment().subtract(intervalInDays * intervalAgo, 'days');
-    console.log('Backdate:', backDate.format());
+    // Convert backDate to UTC for database query
+    const backDate = moment()
+      .tz(group.timezone)
+      .subtract(intervalInDays * intervalAgo, 'days')
+      .utc();
 
     const executionLogs = await this.db.query.executionLogs.findMany({
       where: (table, { and, eq, gte }) =>
@@ -496,7 +521,14 @@ export class HabitGroupService {
         user: true,
       },
     });
-    return executionLogs;
+    // Convert results back to group timezone
+    return executionLogs.map((log) => ({
+      ...log,
+      completionTime: moment
+        .utc(log.completionTime)
+        .tz(group.timezone)
+        .toDate(),
+    }));
   }
   async groupStreak(groupId: number) {
     const streak = await this.db.query.streak.findMany({
@@ -515,13 +547,18 @@ export class HabitGroupService {
   // Cache the streaks for every user and every group daily.
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cacheStreaks() {
-    const currentDate = getCurrentDate();
     const groups = await this.db.query.habitGroup.findMany({
       with: {
         members: true,
       },
     });
     for (let group of groups) {
+      // Use group timezone for midnight
+      const currentDate = moment
+        .tz(group.timezone)
+        .startOf('day')
+        .utc()
+        .toDate();
       for (let member of group.members) {
         this.db.query.executionLogs
           .findMany({
@@ -549,7 +586,7 @@ export class HabitGroupService {
                   groupId: group.id,
                   currentStreak: streakNo,
                   longestStreak: streakNo,
-                  lastChecked: currentDate.toISOString(),
+                  lastChecked: currentDate,
                 },
               ]);
             } else {
@@ -561,7 +598,7 @@ export class HabitGroupService {
                     streakNo > previousStrick.longestStreak
                       ? streakNo
                       : previousStrick.longestStreak,
-                  lastChecked: currentDate.toISOString(),
+                  lastChecked: currentDate,
                 })
                 .where(
                   and(eq(user.id, member.userId), eq(habitGroup.id, group.id)),
@@ -572,7 +609,7 @@ export class HabitGroupService {
     }
     console.log(
       "Executed streaks' cache, for all users and groups " +
-        currentDate.toISOString(),
+        new Date().toISOString(),
     );
   }
 }

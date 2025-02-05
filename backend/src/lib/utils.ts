@@ -36,9 +36,9 @@ export function parseInterval(interval: string) {
   return moment.duration({ [data.quantity]: data.value }).asDays();
 }
 
-export function getCurrentMoment() {
-  return moment().tz('Africa/Lagos');
+export function getCurrentMoment(timezone: string) {
+  return moment().tz(timezone);
 }
-export function getCurrentDate() {
-  return getCurrentMoment().toDate();
+export function getCurrentDate(timezone: string) {
+  return getCurrentMoment(timezone).toDate();
 }

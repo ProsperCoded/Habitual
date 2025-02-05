@@ -28,9 +28,15 @@ export class CreateHabitGroupDto {
   habitId: number;
 
   @IsNotEmpty()
-  // YYYY-MM-DD
+  // ISO date format
+  // YYYY-MM-DDTHH:MM:SS:MSZ
   @IsDateString()
   startDate: string;
+
+  @IsTimeZone()
+  @IsString()
+  @IsNotEmpty() // Make timezone required for better consistency
+  timezone: string;
 
   @IsNotEmpty()
   @IsString()
@@ -59,8 +65,13 @@ export function IsValidInterval(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: string) {
-          const regex = RegExp('^[0-9]+ (days?)|(weeks?)|(months?)|(years?)$');
-          return regex.test(value);
+          // More robust interval validation
+          const regex = /^[1-9]\d*\s+(day|week|month|year)s?$/;
+          if (!regex.test(value)) return false;
+
+          const [count, unit] = value.split(/\s+/);
+          const numericCount = parseInt(count);
+          return numericCount > 0 && numericCount <= 365; // Reasonable limit
         },
       },
     });
