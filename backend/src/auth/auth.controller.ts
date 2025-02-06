@@ -29,11 +29,9 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JWTGuard)
-  async logout(
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<ServerResponse<null>> {
+  async logout(@Res({ passthrough: true }) res: Response) {
     this.authService.logout(res);
-    return { message: 'Logged out Successfully ', data: null };
+    res.json({ message: 'Logged out Successfully ', data: null });
   }
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))

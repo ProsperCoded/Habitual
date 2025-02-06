@@ -341,8 +341,12 @@ export class HabitGroupService {
         // * Insert into execution logs
         return true;
       } else {
-        console.log('Habit execution time has passed');
-        throw new BadRequestException('Habit execution time has passed');
+        const message = `Habit execution time has passed \n wait for ${
+          currentDate.to(executionDate.add(intervalInDays, 'days')) ||
+          '0 seconds'
+        } to execute habit`;
+        console.log(message);
+        throw new BadRequestException(message);
       }
     } else {
       console.log('Habit not scheduled for today');
