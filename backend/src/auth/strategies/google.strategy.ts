@@ -44,6 +44,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     };
     console.log('authenticated user, on signup', user);
 
-    return this.authService.validateGoogleOAuthUser(user);
+    return done(null, await this.authService.validateGoogleOAuthUser(user));
   }
 }

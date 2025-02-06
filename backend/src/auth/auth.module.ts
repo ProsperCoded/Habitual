@@ -19,6 +19,7 @@ import jwtConfig, { JWT_IDENTIFIER } from 'src/config/jwt.config';
   ],
   imports: [DrizzleModule, JwtModule.registerAsync(jwtConfig.asProvider())],
   exports: [
+    AuthService,
     {
       provide: JWT_IDENTIFIER,
       useExisting: JwtService,

@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from 'src/lib/types';
 import { ConfigType } from '@nestjs/config';
 import { Request, Response } from 'express';
+import { globalCookieOptions } from 'src/config/config';
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,10 +22,8 @@ export class AuthService {
 
   logout(res: Response) {
     res.cookie('Authorization', '', {
-      httpOnly: true,
+      ...globalCookieOptions,
       expires: new Date(0),
-      sameSite: 'none',
-      secure: false,
     });
   }
 
