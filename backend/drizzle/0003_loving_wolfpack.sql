@@ -1,0 +1,1 @@
+ALTER TABLE "habitGroup" ALTER COLUMN "timezone" DROP DEFAULT;
