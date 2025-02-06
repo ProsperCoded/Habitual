@@ -322,8 +322,7 @@ export class HabitGroupService {
       const executionTime = moment.tz(
         group.executionTime,
         'HH:mm:ss',
-        // * Timezone not needed here, since we are to extract the time only
-        // group.timezone,
+        group.timezone, // Ensure the timezone is correctly used here
       );
       const executionDate = getCurrentMoment(group.timezone).set({
         hour: executionTime.hour(),

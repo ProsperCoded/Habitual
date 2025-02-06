@@ -27,7 +27,7 @@ export const habitGroup = pgTable('habitGroup', {
   executionTime: time('time')
     .default(sql`CURRENT_TIME`)
     .notNull(),
-  timezone: text('timezone').notNull(),
+  timezone: text('timezone').default('Africa/Lagos').notNull(),
   // tolerance will be a number after executeTime, that habit acknoledgement can still occur
   // seconds
   tolerance: integer('tolerance').default(0).notNull(),
