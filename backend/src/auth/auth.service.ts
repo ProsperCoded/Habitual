@@ -15,9 +15,19 @@ export class AuthService {
     @Inject(jwtConfig.KEY)
     private jwtConfigurations: ConfigType<typeof jwtConfig>,
   ) {}
+  // logout(res: Response) {
+  //   res.cookie('Authorization', '', { httpOnly: true, expires: new Date(0) });
+  // }
+
   logout(res: Response) {
-    res.cookie('Authorization', '', { httpOnly: true, expires: new Date(0) });
+    res.cookie('Authorization', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      sameSite: 'none',
+      secure: false,
+    });
   }
+
   // Signup the user
   private async login(user: CreateUserDto): Promise<UserPayload> {
     const existingUser = await this.usersService.findByEmail(user.email);
