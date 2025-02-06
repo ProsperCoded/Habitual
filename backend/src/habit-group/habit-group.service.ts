@@ -322,15 +322,16 @@ export class HabitGroupService {
       const executionTime = moment.tz(
         group.executionTime,
         'HH:mm:ss',
-        group.timezone,
+        // * Timezone not needed here, since we are to extract the time only
+        // group.timezone,
       );
       const executionDate = getCurrentMoment(group.timezone).set({
         hour: executionTime.hour(),
         minute: executionTime.minute(),
         second: executionTime.second(),
       });
-      const maxTolerance = moment
-        .tz(executionDate, group.timezone)
+      const maxTolerance = executionDate
+        .clone()
         .add(group.tolerance, 'seconds');
       console.log('Execution Date:', executionDate.format());
       console.log('Current Time:', currentDate.format());

@@ -9,7 +9,6 @@ import {
   registerDecorator,
   IsTimeZone,
 } from 'class-validator';
-
 export class CreateHabitGroupDto {
   @IsNotEmpty()
   @IsString()
