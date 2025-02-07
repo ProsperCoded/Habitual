@@ -179,7 +179,6 @@ export class HabitGroupController {
     @Query('page', ParseIntPipe) page: number,
     @Query('limit', ParseIntPipe) limit: number,
   ): Promise<ServerResponse<ExecutionLogsEntity>> {
-    const { id: userId } = req.user as { id: string };
     const executedHabits = await this.habitGroupService.paginatedLogs(
       groupId,
       page,
