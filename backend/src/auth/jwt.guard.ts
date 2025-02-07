@@ -36,7 +36,7 @@ export class JWTGuard implements CanActivate {
       console.log({ decoded });
       request.user = { id: decoded.sub };
       // ! for testing purposes
-      if (this.configService.isProduction === false) {
+      if (!decoded?.sub && this.configService.isProduction === false) {
         request.user = { id: 1 };
         return true;
       }
