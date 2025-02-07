@@ -478,15 +478,9 @@ export class HabitGroupService {
     });
     return executionLogs;
   }
-  async paginatedLogs(
-    userId: string,
-    groupId: string,
-    page: number,
-    limit: number,
-  ) {
+  async paginatedLogs(groupId: string, page: number, limit: number) {
     const executionLogs = await this.db.query.executionLogs.findMany({
-      where: (table, { and, eq }) =>
-        and(eq(table.userId, +userId), eq(table.groupId, +groupId)),
+      where: (table, { eq }) => eq(table.groupId, +groupId),
       with: {
         user: true,
       },
