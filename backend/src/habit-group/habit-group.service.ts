@@ -490,7 +490,7 @@ export class HabitGroupService {
     });
     return executionLogs;
   }
-  async getBackdatedLog(userId: number, groupId: number, intervalAgo: number) {
+  async getBackdatedLogs(groupId: number, intervalAgo: number) {
     const group = await this.db.query.habitGroup.findFirst({
       where: (table, { eq }) => eq(table.id, +groupId),
     });
@@ -511,13 +511,9 @@ export class HabitGroupService {
     const executionLogs = await this.db.query.executionLogs.findMany({
       where: (table, { and, eq, gte }) =>
         and(
-          eq(table.userId, userId),
           eq(table.groupId, groupId),
           gte(table.completionTime, backDate.toDate()),
         ),
-      with: {
-        user: true,
-      },
     });
     // Convert results back to group timezone
     return executionLogs.map((log) => ({

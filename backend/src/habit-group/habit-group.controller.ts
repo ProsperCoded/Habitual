@@ -134,8 +134,7 @@ export class HabitGroupController {
     @Param('intervalAgo', ParseIntPipe) intervalAgo: number,
   ): Promise<ServerResponse<ExecutionLogsEntity>> {
     const { id: userId } = req.user as { id: string };
-    const backdatedLogs = await this.habitGroupService.getBackdatedLog(
-      +userId,
+    const backdatedLogs = await this.habitGroupService.getBackdatedLogs(
       +groupId,
       intervalAgo,
     );
