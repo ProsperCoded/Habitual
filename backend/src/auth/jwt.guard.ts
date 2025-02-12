@@ -36,10 +36,10 @@ export class JWTGuard implements CanActivate {
       console.log({ decoded });
       request.user = { id: decoded.sub };
       // ! for testing purposes
-      if (!decoded?.sub && this.configService.isProduction === false) {
-        request.user = { id: 1 };
-        return true;
-      }
+      // if (!decoded?.sub && this.configService.isProduction === false) {
+      //   request.user = { id: 1 };
+      //   return true;
+      // }
       return !!decoded;
     } catch (error) {
       console.error('Error verifying JWT token:', error.message);
