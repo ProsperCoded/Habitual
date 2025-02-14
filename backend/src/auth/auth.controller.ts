@@ -45,7 +45,7 @@ export class AuthController {
       expires: expiry.toDate(),
     };
     // if (this.configService.isProduction === true) {
-    cookieOptions['secure'] = true;
+    // cookieOptions['secure'] = true;
     // }
     res.cookie('Authorization', user.token, cookieOptions);
     const FRONTEND_URL = this.configService.frontEndUrl;

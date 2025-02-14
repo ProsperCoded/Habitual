@@ -10,4 +10,6 @@ export const globalCookieOptions: CookieOptions = {
   httpOnly: true,
   sameSite: 'none',
   secure: true,
+  maxAge: 3600,
+  domain: process.env.FRONTEND_URL || undefined,
 };
