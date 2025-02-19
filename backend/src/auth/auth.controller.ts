@@ -37,18 +37,16 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user as UserPayload;
+    if (!user) {
+      return res.redirect(302, this.configService.frontEndUrl);
+    }
     console.log({ user });
-    const today = moment();
-    const cookieOptions: CookieOptions = {
-      ...globalCookieOptions,
-    };
-    // if (this.configService.isProduction === true) {
-    // cookieOptions['secure'] = true;
-    // }
-    res.cookie('Authorization', user.token, cookieOptions);
+
     const FRONTEND_URL = this.configService.frontEndUrl;
     const url = new URL(`auth/${user.id.toString()}`, FRONTEND_URL);
-    // url.searchParams.append('id', user.id.toString());
+    url.searchParams.append('token', user.token);
+
+    res.cookie('Authorization', user.token, globalCookieOptions);
     res.redirect(302, url.toString());
     // Todo: Store token as cookie and return the user
     // res.redirect(url.host);

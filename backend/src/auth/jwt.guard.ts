@@ -25,9 +25,14 @@ export class JWTGuard implements CanActivate {
     const request = context.switchToHttp().getRequest() as Request;
     console.log('cookies', request.cookies);
 
-    const token = request.cookies.Authorization;
+    let token = request.cookies.Authorization;
+    // check Authorization header
     if (!token) {
-      console.error('JWT token is missing in cookies');
+      const authHeader = request.headers.authorization;
+      token = authHeader?.split(' ')[1];
+    }
+    if (!token) {
+      console.error('JWT token is missing in cookies or Authorization header');
       return false;
     }
 

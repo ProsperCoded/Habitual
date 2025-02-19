@@ -23,7 +23,7 @@ export class AuthService {
   logout(res: Response) {
     res.cookie('Authorization', '', {
       ...globalCookieOptions,
-      expires: new Date(0),
+      maxAge: 0,
     });
   }
 
