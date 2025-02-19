@@ -11,7 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import config, { globalCookieOptions } from 'src/config/config';
-import { ServerResponse, UserPayload } from 'src/lib/types';
+import { UserPayload } from 'src/lib/types';
 import { CookieOptions, Request, Response } from 'express';
 import { UserService } from 'src/user/user.service';
 import { ConfigType } from '@nestjs/config';
@@ -39,10 +39,8 @@ export class AuthController {
     const user = req.user as UserPayload;
     console.log({ user });
     const today = moment();
-    const expiry = today.add(7, 'days');
     const cookieOptions: CookieOptions = {
       ...globalCookieOptions,
-      expires: expiry.toDate(),
     };
     // if (this.configService.isProduction === true) {
     // cookieOptions['secure'] = true;

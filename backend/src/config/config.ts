@@ -6,10 +6,10 @@ export default registerAs('config', () => ({
   isProduction: process.env.NODE_ENV == 'production',
 }));
 
+let cookie_duration = 7; // days
 export const globalCookieOptions: CookieOptions = {
   httpOnly: true,
   sameSite: 'none',
   secure: true,
-  maxAge: 3600,
-  domain: process.env.FRONTEND_URL || undefined,
+  maxAge: 60 * 60 * 24 * cookie_duration,
 };
